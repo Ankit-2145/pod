@@ -62,7 +62,7 @@ export function LoginForm() {
   return (
     <FieldSet className="flex flex-col gap-6">
       <div className="flex flex-col items-center gap-2 text-center">
-        <h1 className="text-xl font-bold">Welcome back</h1>
+        <h1 className="text-xl font-bold">Welcome back to Pod</h1>
         <FieldDescription>
           Don&apos;t have an account? <Link href="/signup">Sign up</Link>
         </FieldDescription>
@@ -81,7 +81,7 @@ export function LoginForm() {
                   aria-invalid={fieldState.invalid}
                   placeholder="john@example.com"
                   type="email"
-                  autoComplete="off"
+                  // autoComplete="off"
                 />
                 {fieldState.invalid && (
                   <FieldError errors={[fieldState.error]} />
