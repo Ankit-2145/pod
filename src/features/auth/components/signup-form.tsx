@@ -93,7 +93,7 @@ export function SignupForm() {
                   aria-invalid={fieldState.invalid}
                   placeholder="john Doe"
                   type="text"
-                  autoComplete="off"
+                  // autoComplete="off"
                 />
                 {fieldState.invalid && (
                   <FieldError errors={[fieldState.error]} />
@@ -113,7 +113,7 @@ export function SignupForm() {
                   aria-invalid={fieldState.invalid}
                   placeholder="john@example.com"
                   type="email"
-                  autoComplete="off"
+                  // autoComplete="off"
                 />
                 {fieldState.invalid && (
                   <FieldError errors={[fieldState.error]} />
