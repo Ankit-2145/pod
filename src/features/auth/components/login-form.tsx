@@ -9,7 +9,7 @@ import { useRouter } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { authClient } from "@/lib/auth-client";
+import { authClient } from "@/lib/auth/auth-client";
 import {
   Field,
   FieldDescription,
@@ -81,7 +81,6 @@ export function LoginForm() {
                   aria-invalid={fieldState.invalid}
                   placeholder="john@example.com"
                   type="email"
-                  // autoComplete="off"
                 />
                 {fieldState.invalid && (
                   <FieldError errors={[fieldState.error]} />
@@ -94,7 +93,17 @@ export function LoginForm() {
             control={form.control}
             render={({ field, fieldState }) => (
               <Field data-invalid={fieldState.invalid}>
-                <FieldLabel htmlFor={field.name}>Password</FieldLabel>
+                <div className="flex justify-between items-center">
+                  <FieldLabel htmlFor={field.name}>Password</FieldLabel>
+                  <Button
+                    size="sm"
+                    variant="link"
+                    asChild
+                    className="font-normal px-0 text-muted-foreground"
+                  >
+                    <Link href="/reset-password">Forgot password?</Link>
+                  </Button>
+                </div>
                 <PasswordInput
                   {...field}
                   id="password-input"

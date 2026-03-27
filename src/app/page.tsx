@@ -1,4 +1,5 @@
-import { requireAuth } from "@/lib/auth-check";
+import { LogOut } from "@/features/auth/components/log-out";
+import { requireAuth } from "@/lib/auth/auth-check";
 import { caller } from "@/trpc/server";
 
 const Page = async () => {
@@ -53,6 +54,9 @@ const Page = async () => {
                         {new Date(user.updatedAt).toLocaleString()}
                       </p>
                     </div>
+                    <div>
+                      <LogOut />
+                    </div>
                   </div>
                 </div>
               ))}
@@ -60,14 +64,6 @@ const Page = async () => {
           ) : (
             <p>No user data found.</p>
           )}
-        </div>
-
-        {/* JSON Display */}
-        <div className="bg-gray-100 rounded-lg shadow-lg p-6">
-          <h2 className="text-2xl font-bold mb-4">Raw JSON Data</h2>
-          <pre className="text-sm overflow-auto bg-white p-4 rounded border">
-            {JSON.stringify(data, null, 2)}
-          </pre>
         </div>
       </div>
     </div>

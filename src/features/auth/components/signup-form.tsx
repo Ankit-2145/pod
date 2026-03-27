@@ -9,7 +9,7 @@ import { useRouter } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { authClient } from "@/lib/auth-client";
+import { authClient } from "@/lib/auth/auth-client";
 import {
   Field,
   FieldDescription,
@@ -93,7 +93,6 @@ export function SignupForm() {
                   aria-invalid={fieldState.invalid}
                   placeholder="john Doe"
                   type="text"
-                  // autoComplete="off"
                 />
                 {fieldState.invalid && (
                   <FieldError errors={[fieldState.error]} />
@@ -113,7 +112,6 @@ export function SignupForm() {
                   aria-invalid={fieldState.invalid}
                   placeholder="john@example.com"
                   type="email"
-                  // autoComplete="off"
                 />
                 {fieldState.invalid && (
                   <FieldError errors={[fieldState.error]} />
