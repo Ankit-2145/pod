@@ -89,10 +89,11 @@ export function SignupForm() {
                 <FieldLabel htmlFor={field.name}>Name</FieldLabel>
                 <Input
                   {...field}
-                  id="name-input"
+                  id="name"
                   aria-invalid={fieldState.invalid}
                   placeholder="john Doe"
                   type="text"
+                  autoComplete="on"
                 />
                 {fieldState.invalid && (
                   <FieldError errors={[fieldState.error]} />
@@ -108,10 +109,11 @@ export function SignupForm() {
                 <FieldLabel htmlFor={field.name}>Email</FieldLabel>
                 <Input
                   {...field}
-                  id="email-input"
+                  id="email"
                   aria-invalid={fieldState.invalid}
                   placeholder="john@example.com"
                   type="email"
+                  autoComplete="on"
                 />
                 {fieldState.invalid && (
                   <FieldError errors={[fieldState.error]} />
@@ -127,9 +129,10 @@ export function SignupForm() {
                 <FieldLabel htmlFor={field.name}>Password</FieldLabel>
                 <PasswordInput
                   {...field}
-                  id="password-input"
+                  id="password"
                   aria-invalid={fieldState.invalid}
                   placeholder="********"
+                  autoComplete="off"
                 />
 
                 {fieldState.invalid && (

@@ -77,10 +77,11 @@ export function LoginForm() {
                 <FieldLabel htmlFor={field.name}>Email</FieldLabel>
                 <Input
                   {...field}
-                  id="email-input"
+                  id="email"
                   aria-invalid={fieldState.invalid}
                   placeholder="john@example.com"
                   type="email"
+                  autoComplete="on"
                 />
                 {fieldState.invalid && (
                   <FieldError errors={[fieldState.error]} />
@@ -106,9 +107,10 @@ export function LoginForm() {
                 </div>
                 <PasswordInput
                   {...field}
-                  id="password-input"
+                  id="password"
                   aria-invalid={fieldState.invalid}
                   placeholder="********"
+                  autoComplete="off"
                 />
                 {fieldState.invalid && (
                   <FieldError errors={[fieldState.error]} />

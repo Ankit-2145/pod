@@ -53,9 +53,10 @@ export function ResetPasswordForm() {
   return (
     <FieldSet className="flex flex-col gap-6">
       <div className="flex flex-col items-center gap-2 text-center">
-        <h1 className="text-xl font-semibold">Reset Password</h1>
+        <h1 className="text-xl font-semibold">Forgot your password?</h1>
         <FieldDescription>
-          Forgot your password? It happens! Reset it easily and get back in.
+          Enter your email address and we&apos;ll send you a link to reset your
+          password.
         </FieldDescription>
       </div>
       <form
@@ -71,10 +72,11 @@ export function ResetPasswordForm() {
                 <FieldLabel htmlFor={field.name}>Email</FieldLabel>
                 <Input
                   {...field}
-                  id="email-input"
+                  id="email"
                   aria-invalid={fieldState.invalid}
                   placeholder="john@example.com"
                   type="email"
+                  autoComplete="on"
                 />
                 {fieldState.invalid && (
                   <FieldError errors={[fieldState.error]} />
