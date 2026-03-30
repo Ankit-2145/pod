@@ -57,7 +57,7 @@ export function SignupForm() {
       },
       {
         onSuccess: () => {
-          router.push("/");
+          router.push("/verify-email");
         },
         onError: (ctx) => {
           toast.error(ctx.error.message);

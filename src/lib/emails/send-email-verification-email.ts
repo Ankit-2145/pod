@@ -1,17 +1,17 @@
 import { sendEmail } from "./send-email";
 
-type sendPasswordResetEmailParams = {
+type sendEmailVerificationEmailParams = {
   user: { email: string; name: string };
   url: string;
 };
 
-export async function sendPasswordResetEmail({
+export async function sendEmailVerificationEmail({
   user,
   url,
-}: sendPasswordResetEmailParams) {
-  return sendEmail({
+}: sendEmailVerificationEmailParams) {
+  return await sendEmail({
     email: user.email,
-    subject: "Pod - Reset your password",
+    subject: "Pod - Verify your email address",
     html: `<div style="
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
   background-color: #ffffff;
@@ -37,7 +37,7 @@ export async function sendPasswordResetEmail({
         margin: 0 0 32px 0;
         line-height: 1.3;
         letter-spacing: -0.5px;
-      ">Reset your password</h1>
+      ">Verify your email</h1>
       
       <!-- Greeting -->
       <p style="
@@ -53,7 +53,7 @@ export async function sendPasswordResetEmail({
         color: #666666;
         margin: 0 0 32px 0;
         line-height: 1.6;
-      ">We received a request to reset your password. Click the button below to proceed.</p>
+      ">Thank you for signing up! Verify your email address to get started.</p>
       
       <!-- CTA Button -->
       <div style="margin: 40px 0;">
@@ -68,7 +68,7 @@ export async function sendPasswordResetEmail({
           font-weight: 500;
           letter-spacing: 0.3px;
           transition: background-color 0.2s ease;
-        ">Reset Password</a>
+        ">Verify Email</a>
       </div>
       
       <!-- Secondary info -->
@@ -77,14 +77,14 @@ export async function sendPasswordResetEmail({
         color: #999999;
         margin: 32px 0 12px 0;
         line-height: 1.6;
-      ">This link will expire in 1 hour.</p>
+      ">This link will expire in 24 hours.</p>
       
       <p style="
         font-size: 13px;
         color: #999999;
         margin: 0;
         line-height: 1.6;
-      ">If you didn&apos;t request this, you can safely ignore this email.</p>
+      ">If you didn&apos;t create an account, you can safely ignore this email.</p>
     </div>
     
     <!-- Footer spacing -->
