@@ -50,9 +50,7 @@ export function SignupForm() {
   const onSubmit = async (values: SignupFormValues) => {
     await authClient.signUp.email(
       {
-        email: values.email,
-        name: values.name,
-        password: values.password,
+        ...values,
         callbackURL: "/",
       },
       {
@@ -60,7 +58,7 @@ export function SignupForm() {
           router.push("/verify-email");
         },
         onError: (ctx) => {
-          toast.error(ctx.error.message);
+          toast.error(ctx.error.message || "Failed to sign up");
         },
       },
     );
