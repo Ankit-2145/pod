@@ -1,0 +1,94 @@
+import { sendEmail } from "./send-email";
+
+type sendExistingUserEmailParams = {
+  user: { email: string; name: string };
+};
+
+export async function sendExistingUserEmail({
+  user,
+}: sendExistingUserEmailParams) {
+  return await sendEmail({
+    email: user.email,
+    subject: "Pod - Sign-up attempt with your email",
+    html: `<div style="
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+  background-color: #ffffff;
+  padding: 0;
+  margin: 0;
+">
+  <!-- Container -->
+  <div style="
+    max-width: 520px;
+    margin: 0 auto;
+    background-color: #ffffff;
+  ">
+    <!-- Header spacing -->
+    <div style="height: 60px;"></div>
+    
+    <!-- Main content -->
+    <div style="padding: 0 40px;">
+      <!-- Heading -->
+      <h1 style="
+        font-size: 32px;
+        font-weight: 600;
+        color: #1a1a1a;
+        margin: 0 0 32px 0;
+        line-height: 1.3;
+        letter-spacing: -0.5px;
+      ">Sign-up attempt with your email</h1>
+      
+      <!-- Greeting -->
+      <p style="
+        font-size: 15px;
+        color: #666666;
+        margin: 0 0 24px 0;
+        line-height: 1.6;
+      ">Hi ${user.name},</p>
+      
+      <!-- Message -->
+      <p style="
+        font-size: 15px;
+        color: #666666;
+        margin: 0 0 32px 0;
+        line-height: 1.6;
+      ">Someone tried to create an account using your email address. If this was you, try signing in instead. If not, you can safely ignore this email.</p>
+      
+      <!-- CTA Button -->
+      <div style="margin: 40px 0;">
+        <a href="http://localhost:3000/login" style="
+          display: inline-block;
+          background-color: #000000;
+          color: #ffffff;
+          padding: 14px 32px;
+          text-decoration: none;
+          border-radius: 6px;
+          font-size: 15px;
+          font-weight: 500;
+          letter-spacing: 0.3px;
+          transition: background-color 0.2s ease;
+        ">Login</a>
+      </div>
+      
+      <!-- Secondary info -->
+      <p style="
+        font-size: 13px;
+        color: #999999;
+        margin: 32px 0 12px 0;
+        line-height: 1.6;
+      ">This link will expire in 24 hours.</p>
+      
+      <p style="
+        font-size: 13px;
+        color: #999999;
+        margin: 0;
+        line-height: 1.6;
+      ">If you didn&apos;t create an account, you can safely ignore this email.</p>
+    </div>
+    
+    <!-- Footer spacing -->
+    <div style="height: 60px;"></div>
+  </div>
+</div>
+    `,
+  });
+}
