@@ -1,9 +1,10 @@
 import { betterAuth } from "better-auth";
 import prisma from "@/lib/db/prisma";
-import { prismaAdapter } from "better-auth/adapters/prisma";
-import { sendPasswordResetEmail } from "../emails/password-reset-email";
-import { sendEmailVerificationEmail } from "../emails/send-email-verification-email";
 import { nextCookies } from "better-auth/next-js";
+import { prismaAdapter } from "better-auth/adapters/prisma";
+import { sendExistingUserEmail } from "../emails/send-existing-user-email";
+import { sendPasswordResetEmail } from "../emails/send-password-reset-email";
+import { sendEmailVerificationEmail } from "../emails/send-email-verification-email";
 
 export const auth = betterAuth({
   appName: process.env.APP_NAME,
@@ -22,6 +23,9 @@ export const auth = betterAuth({
   emailAndPassword: {
     enabled: true,
     requireEmailVerification: true,
+    onExistingUserSignUp: async ({ user }) => {
+      await sendExistingUserEmail({ user });
+    },
     sendResetPassword: async ({ user, url }) => {
       await sendPasswordResetEmail({ user, url });
     },
