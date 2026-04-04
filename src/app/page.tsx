@@ -1,70 +1,25 @@
-import { LogOut } from "@/features/auth/components/log-out";
+import { Button } from "@/components/ui/button";
 import { requireAuth } from "@/lib/auth/auth-check";
-import { caller } from "@/trpc/server";
+import Link from "next/link";
 
 const Page = async () => {
   await requireAuth();
-
-  const data = await caller.getUsers();
 
   return (
     <div className="min-h-screen min-w-screen flex items-center justify-center p-8">
       <div className="max-w-4xl w-full space-y-8">
         {/* UI Display */}
         <div className="bg-white rounded-lg shadow-lg p-6">
-          <h2 className="text-2xl font-bold mb-4">User Information</h2>
-          {data.length > 0 ? (
-            <div className="space-y-4">
-              {data.map((user) => (
-                <div key={user.id} className="border rounded-lg p-4">
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <label className="font-semibold">ID:</label>
-                      <p className="text-sm text-gray-600">{user.id}</p>
-                    </div>
-                    <div>
-                      <label className="font-semibold">Name:</label>
-                      <p className="text-sm text-gray-600">{user.name}</p>
-                    </div>
-                    <div>
-                      <label className="font-semibold">Email:</label>
-                      <p className="text-sm text-gray-600">{user.email}</p>
-                    </div>
-                    <div>
-                      <label className="font-semibold">Email Verified:</label>
-                      <p className="text-sm text-gray-600">
-                        {user.emailVerified ? "Yes" : "No"}
-                      </p>
-                    </div>
-                    <div>
-                      <label className="font-semibold">Image:</label>
-                      <p className="text-sm text-gray-600">
-                        {user.image || "No image"}
-                      </p>
-                    </div>
-                    <div>
-                      <label className="font-semibold">Created At:</label>
-                      <p className="text-sm text-gray-600">
-                        {new Date(user.createdAt).toLocaleString()}
-                      </p>
-                    </div>
-                    <div>
-                      <label className="font-semibold">Updated At:</label>
-                      <p className="text-sm text-gray-600">
-                        {new Date(user.updatedAt).toLocaleString()}
-                      </p>
-                    </div>
-                    <div>
-                      <LogOut />
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <p>No user data found.</p>
-          )}
+          <h2 className="text-2xl font-bold mb-4">Welcome to the Dashboard</h2>
+          <p className="text-sm text-gray-600">
+            This is the main dashboard page. You can navigate to different
+            sections using the sidebar. Here you can manage your profile, view
+            your settings, and access other features of the application.
+          </p>
         </div>
+        <Button className="bg-blue-500 text-white hover:bg-blue-600">
+          <Link href="/dashboard/profile">Go to Profile</Link>
+        </Button>
       </div>
     </div>
   );
