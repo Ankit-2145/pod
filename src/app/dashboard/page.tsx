@@ -1,4 +1,8 @@
-const Dashboard = () => {
+import { requireAuth } from "@/lib/auth/auth-check";
+
+const Dashboard = async () => {
+  await requireAuth();
+
   return (
     <main>
       <div className="flex items-center justify-center min-h-[calc(100vh-80px)]">

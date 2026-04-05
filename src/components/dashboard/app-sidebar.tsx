@@ -8,6 +8,7 @@ import {
   StarIcon,
 } from "lucide-react";
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import {
   Sidebar,
@@ -55,7 +56,8 @@ export const AppSidebar = () => {
         <SidebarMenuItem>
           <SidebarMenuButton asChild className="gap-x-4 h-10 px-4">
             <Link href="/" prefetch>
-              <span className="font-semibold text-sm">Pod</span>
+              <Image src="/logos/logo.svg" alt="pod" width={30} height={30} />
+              <span className="font-semibold text-base">Pod LMS</span>
             </Link>
           </SidebarMenuButton>
         </SidebarMenuItem>
