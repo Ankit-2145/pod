@@ -20,6 +20,11 @@ export const auth = betterAuth({
   advanced: {
     cookiePrefix: "pod-lms",
   },
+  user: {
+    changeEmail: {
+      enabled: true,
+    },
+  },
   emailAndPassword: {
     enabled: true,
     requireEmailVerification: true,
