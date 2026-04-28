@@ -47,7 +47,7 @@ const page = async () => {
                 <h1 className="text-3xl font-bold">
                   {session?.user.name || "User Profile"}
                 </h1>
-                <Badge>{session?.user.role || "User"}</Badge>
+                <Badge>User</Badge>
               </div>
               <p className="text-muted-foreground">{session?.user.email}</p>
             </div>
