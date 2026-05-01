@@ -5,6 +5,7 @@ import { prismaAdapter } from "better-auth/adapters/prisma";
 import { sendExistingUserEmail } from "../emails/send-existing-user-email";
 import { sendPasswordResetEmail } from "../emails/send-password-reset-email";
 import { sendEmailVerificationEmail } from "../emails/send-email-verification-email";
+// import { sendChangeEmailConfirmationEmail } from "../emails/send-change-email-confirmation-email";
 
 export const auth = betterAuth({
   appName: process.env.APP_NAME,
@@ -23,6 +24,11 @@ export const auth = betterAuth({
   user: {
     changeEmail: {
       enabled: true,
+      // INFO: For change email, send email is by default enabled in better-auth
+      // TODO: implement this in the future if needed (This for sending confirmation email to current email when user tries to change their email)
+      // sendChangeEmailConfirmation: async ({ user, newEmail, url }) => {
+      //   await sendChangeEmailConfirmationEmail({ user, newEmail, url });
+      // },
     },
   },
   emailAndPassword: {

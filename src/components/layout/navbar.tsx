@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
-import { Menu, ChevronRight } from "lucide-react";
+import { Menu, ChevronRight, Loader2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -38,7 +38,7 @@ const navItems: NavItemProps[] = [
 export const Navbar = () => {
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
-  const { data: session } = authClient.useSession();
+  const { data: session, isPending } = authClient.useSession();
 
   return (
     <header className="sticky top-0 z-50 w-full py-3 px-4 md:px-6 ">
@@ -69,9 +69,7 @@ export const Navbar = () => {
                   isActive && "bg-foreground text-white rounded-md",
                 )}
               >
-                <Link href={item.href} prefetch>
-                  {item.label}
-                </Link>
+                <Link href={item.href}>{item.label}</Link>
               </Button>
             );
           })}
@@ -79,14 +77,15 @@ export const Navbar = () => {
 
         {/* Desktop Auth Buttons */}
         <div className="hidden md:flex items-center space-x-3">
-          {session?.user ? (
+          {isPending ? (
+            <Loader2 className="animate-spin h-5 w-5" />
+          ) : session?.user ? (
             <UserButton />
           ) : (
             <>
-              <Button variant="outline" className="cursor-pointer" asChild>
+              <Button variant="outline" asChild>
                 <Link href="/login">Log in</Link>
               </Button>
-
               <Button asChild>
                 <Link href="/signup">Sign up</Link>
               </Button>
@@ -100,7 +99,9 @@ export const Navbar = () => {
 
           <Sheet open={open} onOpenChange={setOpen}>
             <SheetTrigger asChild>
-              <Menu className="h-6 w-6 cursor-pointer" />
+              <button aria-label="Open menu">
+                <Menu className="h-6 w-6" />
+              </button>
             </SheetTrigger>
             <SheetContent
               showCloseButton={false}
@@ -158,7 +159,9 @@ export const Navbar = () => {
 
                 {/* Auth Buttons Footer */}
                 <SheetFooter className="p-4 border-t mt-auto">
-                  {session?.user ? (
+                  {isPending ? (
+                    <Loader2 className="animate-spin h-5 w-5" />
+                  ) : session?.user ? (
                     <LogOutButton>Log out</LogOutButton>
                   ) : (
                     <div className="grid grid-cols-2 gap-2 w-full">
@@ -166,6 +169,7 @@ export const Navbar = () => {
                         variant="outline"
                         className="w-full cursor-pointer"
                         onClick={() => setOpen(false)}
+                        asChild
                       >
                         <Link href="/login">Log in</Link>
                       </Button>

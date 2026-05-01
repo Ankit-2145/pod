@@ -1,9 +1,11 @@
 import Link from "next/link";
+import { ReactNode, Suspense } from "react";
 import { requireAuth } from "@/lib/auth/auth-check";
 import {
   ArrowLeft,
   Key,
   LinkIcon,
+  Loader2Icon,
   Shield,
   Trash2,
   User,
@@ -13,7 +15,9 @@ import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ProfileUpdateForm } from "@/features/profile/components/profile-update-form";
+import { ProfileUpdateForm } from "@/features/user-management/profile/profile-update-form";
+import { SecurityTab } from "@/features/user-management/security/security-tab";
+import { SessionsTab } from "@/features/user-management/sessions/session-tab";
 
 const page = async () => {
   const session = await requireAuth();
@@ -81,24 +85,39 @@ const page = async () => {
           <TabsContent value="profile">
             <Card>
               <CardContent>
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <p className="text-sm font-medium">User ID</p>
+                  </div>
+                  <div className="flex items-center gap-2 rounded-md bg-muted p-3">
+                    {/* <Fingerprint className="h-4 w-4 text-brand" /> */}
+                    <code className="text-xs font-mono flex-1 break-all">
+                      {session?.user?.id || "Not available"}
+                    </code>
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    This is your unique user ID. You may need this for support
+                    requests.
+                  </p>
+                </div>
                 <ProfileUpdateForm user={session.user} />
               </CardContent>
             </Card>
           </TabsContent>
 
           <TabsContent value="security">
-            {/* <LoadingSuspense>
+            <LoadingSuspense>
               <SecurityTab
                 email={session.user.email}
-                isTwoFactorEnabled={session.user.twoFactorEnabled ?? false}
+                // isTwoFactorEnabled={session.user.twoFactorEnabled ?? false}
               />
-            </LoadingSuspense> */}
+            </LoadingSuspense>
           </TabsContent>
 
           <TabsContent value="sessions">
-            {/* <LoadingSuspense>
+            <LoadingSuspense>
               <SessionsTab currentSessionToken={session.session.token} />
-            </LoadingSuspense> */}
+            </LoadingSuspense>
           </TabsContent>
 
           <TabsContent value="accounts">
@@ -122,3 +141,11 @@ const page = async () => {
 };
 
 export default page;
+
+function LoadingSuspense({ children }: { children: ReactNode }) {
+  return (
+    <Suspense fallback={<Loader2Icon className="size-20 animate-spin" />}>
+      {children}
+    </Suspense>
+  );
+}

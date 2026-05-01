@@ -20,6 +20,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+// import { ModeToggle } from "../ui/mode-toggle";
 
 export const UserButton = () => {
   const { data: session } = authClient.useSession();
@@ -107,6 +108,18 @@ export const UserButton = () => {
             </DropdownMenuItem>
           </Link>
         </DropdownMenuGroup>
+
+        <DropdownMenuSeparator className="my-2" />
+
+        {/* <DropdownMenuGroup>
+          <DropdownMenuLabel className="text-xs font-normal text-muted-foreground px-2 pb-1">
+            Theme
+          </DropdownMenuLabel>
+
+          <DropdownMenuItem className="flex items-center gap-2 p-2 cursor-pointer rounded-md">
+            <ModeToggle />
+          </DropdownMenuItem>
+        </DropdownMenuGroup> */}
 
         <DropdownMenuSeparator className="my-2" />
 
