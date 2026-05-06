@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { Inter, Source_Serif_4, JetBrains_Mono } from "next/font/google";
-// @ts-expect-error - The global CSS import is necessary for Tailwind and other styles to work correctly
 import "./globals.css";
 
 import { TRPCReactProvider } from "@/trpc/client";
