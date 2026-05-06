@@ -5,6 +5,7 @@ import { prismaAdapter } from "better-auth/adapters/prisma";
 import { sendExistingUserEmail } from "../emails/send-existing-user-email";
 import { sendPasswordResetEmail } from "../emails/send-password-reset-email";
 import { sendEmailVerificationEmail } from "../emails/send-email-verification-email";
+import { sendDeleteAccountVerificationEmail } from "../emails/send-delete-account-verification-email";
 // import { sendChangeEmailConfirmationEmail } from "../emails/send-change-email-confirmation-email";
 
 export const auth = betterAuth({
@@ -12,6 +13,13 @@ export const auth = betterAuth({
   database: prismaAdapter(prisma, {
     provider: "postgresql",
   }),
+  baseURL: process.env.BETTER_AUTH_URL,
+  socialProviders: {
+    google: {
+      clientId: process.env.GOOGLE_CLIENT_ID as string,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET as string,
+    },
+  },
   session: {
     cookieCache: {
       enabled: true,
@@ -30,7 +38,14 @@ export const auth = betterAuth({
       //   await sendChangeEmailConfirmationEmail({ user, newEmail, url });
       // },
     },
+    deleteUser: {
+      enabled: true,
+      sendDeleteAccountVerification: async ({ user, url }) => {
+        await sendDeleteAccountVerificationEmail({ user, url });
+      },
+    },
   },
+
   emailAndPassword: {
     enabled: true,
     requireEmailVerification: true,

@@ -3,6 +3,7 @@ import { ReactNode, Suspense } from "react";
 import { requireAuth } from "@/lib/auth/auth-check";
 import {
   ArrowLeft,
+  FingerprintIcon,
   Key,
   LinkIcon,
   Loader2Icon,
@@ -17,7 +18,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ProfileUpdateForm } from "@/features/user-management/profile/profile-update-form";
 import { SecurityTab } from "@/features/user-management/security/security-tab";
-import { SessionsTab } from "@/features/user-management/sessions/session-tab";
+import { SessionsTab } from "@/features/user-management/security/session-tab";
+import { LinkedAccountsTab } from "@/features/user-management/account/linked-accounts-tab";
+import { AccountDeletion } from "@/features/user-management/account/account-deletion";
 
 const page = async () => {
   const session = await requireAuth();
@@ -90,7 +93,7 @@ const page = async () => {
                     <p className="text-sm font-medium">User ID</p>
                   </div>
                   <div className="flex items-center gap-2 rounded-md bg-muted p-3">
-                    {/* <Fingerprint className="h-4 w-4 text-brand" /> */}
+                    <FingerprintIcon className="h-4 w-4 text-brand" />
                     <code className="text-xs font-mono flex-1 break-all">
                       {session?.user?.id || "Not available"}
                     </code>
@@ -121,9 +124,9 @@ const page = async () => {
           </TabsContent>
 
           <TabsContent value="accounts">
-            {/* <LoadingSuspense>
+            <LoadingSuspense>
               <LinkedAccountsTab />
-            </LoadingSuspense> */}
+            </LoadingSuspense>
           </TabsContent>
 
           <TabsContent value="danger">
@@ -131,7 +134,9 @@ const page = async () => {
               <CardHeader>
                 <CardTitle className="text-destructive">Danger Zone</CardTitle>
               </CardHeader>
-              <CardContent>{/* <AccountDeletion /> */}</CardContent>
+              <CardContent>
+                <AccountDeletion />
+              </CardContent>
             </Card>
           </TabsContent>
         </Tabs>

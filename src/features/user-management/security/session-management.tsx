@@ -26,6 +26,7 @@ export function SessionManagement({
     return authClient.revokeOtherSessions(undefined, {
       onSuccess: () => {
         router.refresh();
+        toast.success("All sessions revoked successfully");
       },
     });
   };

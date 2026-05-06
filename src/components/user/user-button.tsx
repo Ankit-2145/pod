@@ -3,13 +3,15 @@
 import Link from "next/link";
 import { authClient } from "@/lib/auth/auth-client";
 import {
-  ChevronRight,
-  UserRound,
+  ChevronRightIcon,
   LogOutIcon,
   ChevronDownIcon,
+  SettingsIcon,
+  MoonIcon,
+  SunIcon,
 } from "lucide-react";
 import { LogOutButton } from "@/components/user/log-out-button";
-import { Badge } from "@/components/ui/badge";
+// import { Badge } from "@/components/ui/badge";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -20,115 +22,117 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-// import { ModeToggle } from "../ui/mode-toggle";
+import { Button } from "@/components/ui/button";
+import { useTheme } from "next-themes";
 
 export const UserButton = () => {
   const { data: session } = authClient.useSession();
+  const { theme, setTheme } = useTheme();
+
+  const userInitial = session?.user?.name?.charAt(0).toUpperCase() || "U";
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <button
-          type="button"
-          className="flex items-center gap-4 transition-all duration-200 focus:outline-none"
+        <Button
+          variant="ghost"
+          size="sm"
+          className="h-10 gap-2 px-2 hover:bg-muted"
         >
-          {" "}
-          <div className="relative">
-            <div className="size-10 rounded-full">
-              <div className="w-full h-full rounded-full overflow-hidden">
-                <Avatar className="h-9 w-9 border-2 border-transparent">
-                  <AvatarImage
-                    src={session?.user?.image || ""}
-                    alt={session?.user?.name || "User"}
-                  />
-                  <AvatarFallback className="bg-linear-to-br from-primary/10 to-primary/30 text-brand font-semibold">
-                    {session?.user?.name ? (
-                      session?.user.name.charAt(0).toUpperCase()
-                    ) : (
-                      <UserRound className="h-4 w-4" />
-                    )}
-                  </AvatarFallback>
-                </Avatar>
-              </div>
-            </div>
-          </div>
-          <div className="text-left flex-1">
-            <div className="text-sm font-medium text-zinc-900 dark:text-zinc-100 tracking-tight leading-tight">
-              {session?.user?.name}{" "}
-              <ChevronDownIcon className="inline-block size-4 text-muted-foreground" />
-            </div>
-          </div>
-        </button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent className="w-72 p-2 rounded-2xl">
-        <div className="flex items-center gap-3 p-2 rounded-md hover:bg-muted/50 transition-colors">
-          <Avatar className="h-12 w-12 border border-muted">
+          <Avatar className="h-8 w-8">
             <AvatarImage
               src={session?.user?.image || ""}
               alt={session?.user?.name || "User"}
             />
-            <AvatarFallback className="bg-linear-to-br from-primary/10 to-primary/30 text-brand font-semibold">
-              {session?.user?.name ? (
-                session?.user?.name.charAt(0).toUpperCase()
-              ) : (
-                <UserRound className="h-5 w-5" />
-              )}
+            <AvatarFallback className="bg-primary/10 text-primary font-semibold text-xs">
+              {userInitial}
             </AvatarFallback>
           </Avatar>
-          <div className="flex-1 min-w-0">
-            <p className="font-medium text-foreground truncate">
+          <div className="hidden sm:block text-left">
+            <div className="text-sm font-medium leading-none">
               {session?.user?.name}
-            </p>
-            <p className="text-xs text-muted-foreground truncate">
-              {session?.user?.email}
-            </p>
-
-            <Badge
-              variant="outline"
-              className="mt-1 text-xs px-1.5 py-0 border-brand/20 text-brand"
-            >
-              Student
-            </Badge>
+            </div>
           </div>
+          <ChevronDownIcon className="h-4 w-4 text-muted-foreground opacity-50" />
+        </Button>
+      </DropdownMenuTrigger>
+
+      <DropdownMenuContent align="end" className="w-56">
+        {/* User Profile Section */}
+        <div className="px-2 py-3">
+          <div className="flex items-center gap-3">
+            <Avatar className="h-10 w-10">
+              <AvatarImage
+                src={session?.user?.image || ""}
+                alt={session?.user?.name || "User"}
+              />
+              <AvatarFallback className="bg-primary/10 text-primary font-semibold">
+                {userInitial}
+              </AvatarFallback>
+            </Avatar>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-semibold text-foreground truncate">
+                {session?.user?.name}
+              </p>
+              <p className="text-xs text-muted-foreground truncate">
+                {session?.user?.email}
+              </p>
+            </div>
+          </div>
+          {/* Uncomment if you want the badge */}
+          {/* <Badge variant="secondary" className="mt-2 w-fit text-xs">
+            Student
+          </Badge> */}
         </div>
 
         <DropdownMenuSeparator className="my-2" />
 
         {/* Account Section */}
         <DropdownMenuGroup>
-          <DropdownMenuLabel className="text-xs font-normal text-muted-foreground px-2 pb-1">
+          <DropdownMenuLabel className="text-xs font-semibold text-muted-foreground px-2">
             Account
           </DropdownMenuLabel>
-
           <Link prefetch href="/profile" className="block">
-            <DropdownMenuItem className="flex items-center gap-2 p-2 cursor-pointer rounded-md">
-              <UserRound className="h-4 w-4 text-muted-foreground" />
-              <span>Profile Settings</span>
-              <ChevronRight className="h-3 w-3 ml-auto text-muted-foreground" />
+            <DropdownMenuItem className="flex items-center gap-2 cursor-pointer">
+              <SettingsIcon className="h-4 w-4 text-muted-foreground" />
+              <span className="text-sm">Profile Settings</span>
+              <ChevronRightIcon className="h-3 w-3 ml-auto text-muted-foreground opacity-50" />
             </DropdownMenuItem>
           </Link>
         </DropdownMenuGroup>
 
         <DropdownMenuSeparator className="my-2" />
 
-        {/* <DropdownMenuGroup>
-          <DropdownMenuLabel className="text-xs font-normal text-muted-foreground px-2 pb-1">
-            Theme
+        {/* Theme Section */}
+        <DropdownMenuGroup>
+          <DropdownMenuLabel className="text-xs font-semibold text-muted-foreground px-2">
+            Appearance
           </DropdownMenuLabel>
-
-          <DropdownMenuItem className="flex items-center gap-2 p-2 cursor-pointer rounded-md">
-            <ModeToggle />
+          <DropdownMenuItem
+            onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+            className="flex items-center gap-2 cursor-pointer"
+          >
+            {theme === "dark" ? (
+              <>
+                <SunIcon className="h-4 w-4 text-muted-foreground" />
+                <span className="text-sm">Light Mode</span>
+              </>
+            ) : (
+              <>
+                <MoonIcon className="h-4 w-4 text-muted-foreground" />
+                <span className="text-sm">Dark Mode</span>
+              </>
+            )}
           </DropdownMenuItem>
-        </DropdownMenuGroup> */}
+        </DropdownMenuGroup>
 
         <DropdownMenuSeparator className="my-2" />
 
+        {/* Logout Section */}
         <LogOutButton>
-          <DropdownMenuItem className="cursor-pointer">
-            <LogOutIcon className="size-4 text-destructive" />
-            <span className="text-sm font-medium text-destructive">
-              Log out
-            </span>
+          <DropdownMenuItem className="flex items-center gap-2 cursor-pointer text-destructive focus:text-destructive">
+            <LogOutIcon className="h-4 w-4" />
+            <span className="text-sm">Log out</span>
           </DropdownMenuItem>
         </LogOutButton>
       </DropdownMenuContent>
