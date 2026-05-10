@@ -69,7 +69,7 @@ export function ChangePasswordForm() {
                 <FieldLabel htmlFor={field.name}>Current Password</FieldLabel>
                 <PasswordInput
                   {...field}
-                  id="password"
+                  id="currentPassword"
                   aria-invalid={fieldState.invalid}
                   placeholder="********"
                   autoComplete="off"
@@ -89,7 +89,7 @@ export function ChangePasswordForm() {
                 <FieldLabel htmlFor={field.name}>New Password</FieldLabel>
                 <PasswordInput
                   {...field}
-                  id="password"
+                  id="newPassword"
                   aria-invalid={fieldState.invalid}
                   placeholder="********"
                   autoComplete="off"
@@ -107,6 +107,7 @@ export function ChangePasswordForm() {
               <Field data-invalid={fieldState.invalid}>
                 <div className="flex items-center gap-2">
                   <Checkbox
+                    id={field.name}
                     checked={field.value}
                     onCheckedChange={field.onChange}
                   />

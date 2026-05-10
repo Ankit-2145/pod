@@ -3,7 +3,6 @@
 import { z } from "zod";
 import { toast } from "sonner";
 import Link from "next/link";
-import Image from "next/image";
 import { Controller, useForm } from "react-hook-form";
 import { useRouter } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -20,6 +19,7 @@ import {
   FieldSet,
 } from "@/components/ui/field";
 import { PasswordInput } from "@/components/ui/password-input";
+import { SocialAuthButtons } from "./social-auth-buttons";
 
 const signupSchema = z.object({
   name: z.string().min(1, "Name is required"),
@@ -47,7 +47,7 @@ export function SignupForm() {
     },
   });
 
-  const onSubmit = async (values: SignupFormValues) => {
+  const onSignup = async (values: SignupFormValues) => {
     await authClient.signUp.email(
       {
         ...values,
@@ -77,7 +77,7 @@ export function SignupForm() {
           </Link>
         </FieldDescription>
       </div>
-      <form id="signup-form" onSubmit={form.handleSubmit(onSubmit)}>
+      <form id="signup-form" onSubmit={form.handleSubmit(onSignup)}>
         <FieldGroup>
           <Controller
             name="name"
@@ -150,20 +150,7 @@ export function SignupForm() {
           </Field>
           <FieldSeparator>Or</FieldSeparator>
           <Field>
-            <Button
-              variant="outline"
-              className="w-full"
-              type="button"
-              disabled={isPending}
-            >
-              <Image
-                alt="Google"
-                src="/logos/google.svg"
-                width={20}
-                height={20}
-              />
-              Continue with Google
-            </Button>
+            <SocialAuthButtons />
           </Field>
         </FieldGroup>
       </form>

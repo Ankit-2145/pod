@@ -9,8 +9,16 @@ import { auth } from "@/lib/auth/auth";
 import { headers } from "next/headers";
 import { ChangePasswordForm } from "./change-password-form";
 import { SetPasswordButton } from "./set-password-button";
+import { Badge } from "@/components/ui/badge";
+import { TwoFactor } from "./two-factor";
 
-export async function SecurityTab({ email }: { email: string }) {
+export async function SecurityTab({
+  email,
+  isTwoFactorEnabled,
+}: {
+  email: string;
+  isTwoFactorEnabled: boolean;
+}) {
   const accounts = await auth.api.listUserAccounts({
     headers: await headers(),
   });
@@ -46,6 +54,27 @@ export async function SecurityTab({ email }: { email: string }) {
           </CardContent>
         </Card>
       )}
+      {hasPasswordAccount && (
+        <Card>
+          <CardHeader className="flex items-center justify-between gap-2">
+            <CardTitle>Two-Factor Authentication</CardTitle>
+            <Badge variant={isTwoFactorEnabled ? "default" : "secondary"}>
+              {isTwoFactorEnabled ? "Enabled" : "Disabled"}
+            </Badge>
+          </CardHeader>
+          <CardContent>
+            <TwoFactor isEnabled={isTwoFactorEnabled} />
+          </CardContent>
+        </Card>
+      )}
+      {/* <Card>
+        <CardHeader>
+          <CardTitle>Passkeys</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <PasskeyManagement passkeys={passkeys} />
+        </CardContent>
+      </Card> */}
     </div>
   );
 }

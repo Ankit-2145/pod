@@ -112,7 +112,7 @@ const page = async () => {
             <LoadingSuspense>
               <SecurityTab
                 email={session.user.email}
-                // isTwoFactorEnabled={session.user.twoFactorEnabled ?? false}
+                isTwoFactorEnabled={session.user.twoFactorEnabled ?? false}
               />
             </LoadingSuspense>
           </TabsContent>

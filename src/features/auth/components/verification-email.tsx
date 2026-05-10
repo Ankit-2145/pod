@@ -11,7 +11,7 @@ import {
 import { MailCheckIcon } from "lucide-react";
 import Link from "next/link";
 
-export function EmailVerification() {
+export function VerificationEmail() {
   return (
     <Card className="w-full max-w-md mx-auto my-2">
       <CardHeader>

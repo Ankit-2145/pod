@@ -2,6 +2,8 @@ import { betterAuth } from "better-auth";
 import prisma from "@/lib/db/prisma";
 import { nextCookies } from "better-auth/next-js";
 import { prismaAdapter } from "better-auth/adapters/prisma";
+import { twoFactor } from "better-auth/plugins";
+
 import { sendExistingUserEmail } from "../emails/send-existing-user-email";
 import { sendPasswordResetEmail } from "../emails/send-password-reset-email";
 import { sendEmailVerificationEmail } from "../emails/send-email-verification-email";
@@ -63,5 +65,5 @@ export const auth = betterAuth({
       await sendEmailVerificationEmail({ user, url });
     },
   },
-  plugins: [nextCookies()],
+  plugins: [nextCookies(), twoFactor()],
 });

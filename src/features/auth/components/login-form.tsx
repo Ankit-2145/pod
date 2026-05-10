@@ -3,7 +3,6 @@
 import { z } from "zod";
 import { toast } from "sonner";
 import Link from "next/link";
-import Image from "next/image";
 import { Controller, useForm } from "react-hook-form";
 import { useRouter } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -20,6 +19,7 @@ import {
   FieldSet,
 } from "@/components/ui/field";
 import { PasswordInput } from "@/components/ui/password-input";
+import { SocialAuthButtons } from "./social-auth-buttons";
 
 const loginSchema = z.object({
   email: z.email("Please enter a valid email address"),
@@ -39,7 +39,7 @@ export function LoginForm() {
     },
   });
 
-  const onSubmit = async (values: LoginFormValues) => {
+  const onLogin = async (values: LoginFormValues) => {
     await authClient.signIn.email(
       {
         email: values.email,
@@ -47,8 +47,12 @@ export function LoginForm() {
         callbackURL: "/",
       },
       {
-        onSuccess: () => {
-          router.push("/");
+        onSuccess(ctx) {
+          if (ctx.data.twoFactorEnabled) {
+            router.push("/two-factor");
+          } else {
+            router.push("/");
+          }
         },
         onError: (ctx) => {
           toast.error(ctx.error.message);
@@ -67,7 +71,7 @@ export function LoginForm() {
           Don&apos;t have an account? <Link href="/signup">Sign up</Link>
         </FieldDescription>
       </div>
-      <form id="login-form" onSubmit={form.handleSubmit(onSubmit)}>
+      <form id="login-form" onSubmit={form.handleSubmit(onLogin)}>
         <FieldGroup>
           <Controller
             name="email"
@@ -125,20 +129,7 @@ export function LoginForm() {
           </Field>
           <FieldSeparator>Or</FieldSeparator>
           <Field>
-            <Button
-              variant="outline"
-              className="w-full"
-              type="button"
-              disabled={isPending}
-            >
-              <Image
-                alt="Google"
-                src="/logos/google.svg"
-                width={20}
-                height={20}
-              />
-              Continue with Google
-            </Button>
+            <SocialAuthButtons />
           </Field>
         </FieldGroup>
       </form>
