@@ -4,8 +4,8 @@ import "./globals.css";
 
 import { TRPCReactProvider } from "@/trpc/client";
 import { Toaster } from "@/components/ui/sonner";
-import { Navbar } from "@/components/layout/navbar";
 import { ThemeProvider } from "@/components/providers/theme-provider";
+import { ImpersonationIndicator } from "@/features/admin/impersonation-indicator";
 
 const fontSans = Inter({
   subsets: ["latin"],
@@ -43,9 +43,9 @@ export default function RootLayout({
             enableSystem
             disableTransitionOnChange
           >
-            <Navbar />
             {children}
             <Toaster />
+            <ImpersonationIndicator />
           </ThemeProvider>
         </TRPCReactProvider>
       </body>

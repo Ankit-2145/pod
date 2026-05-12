@@ -21,9 +21,11 @@ import { SecurityTab } from "@/features/user-management/security/security-tab";
 import { SessionsTab } from "@/features/user-management/security/session-tab";
 import { LinkedAccountsTab } from "@/features/user-management/account/linked-accounts-tab";
 import { AccountDeletion } from "@/features/user-management/account/account-deletion";
+import { Button } from "@/components/ui/button";
 
-const page = async () => {
+export default async function ProfilePage() {
   const session = await requireAuth();
+  const isAdmin = session.user.role === "admin";
 
   return (
     <>
@@ -54,9 +56,17 @@ const page = async () => {
                 <h1 className="text-3xl font-bold">
                   {session?.user.name || "User Profile"}
                 </h1>
-                <Badge>User</Badge>
+                <Badge>{session?.user.role}</Badge>
               </div>
               <p className="text-muted-foreground">{session?.user.email}</p>
+              {isAdmin && (
+                <Button variant="outline" className="mt-4" size="sm" asChild>
+                  <Link href="/admin" className="flex items-center">
+                    <Shield className="h-4 w-4 mr-2" />
+                    Admin Panel
+                  </Link>
+                </Button>
+              )}
             </div>
           </div>
         </div>
@@ -143,9 +153,7 @@ const page = async () => {
       </div>
     </>
   );
-};
-
-export default page;
+}
 
 function LoadingSuspense({ children }: { children: ReactNode }) {
   return (
