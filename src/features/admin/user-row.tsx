@@ -38,6 +38,24 @@ export function UserRow({
   const router = useRouter();
   const isSelf = user.id === selfId;
 
+  function handleAdmin(userId: string) {
+    authClient.admin.setRole(
+      {
+        userId,
+        role: user.role === "admin" ? "user" : "admin",
+      },
+      {
+        onError: (error) => {
+          toast.error(error.error.message || "Failed to update user role");
+        },
+        onSuccess: () => {
+          toast.success("User role updated");
+          router.refresh();
+        },
+      },
+    );
+  }
+
   function handleImpersonateUser(userId: string) {
     authClient.admin.impersonateUser(
       { userId },
@@ -145,6 +163,9 @@ export function UserRow({
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent>
+                <DropdownMenuItem onClick={() => handleAdmin(user.id)}>
+                  {user.role === "admin" ? "Remove Admin" : "Make Admin"}
+                </DropdownMenuItem>
                 <DropdownMenuItem
                   onClick={() => handleImpersonateUser(user.id)}
                 >

@@ -2,7 +2,12 @@ import { betterAuth } from "better-auth";
 import prisma from "@/lib/db/prisma";
 import { nextCookies } from "better-auth/next-js";
 import { prismaAdapter } from "better-auth/adapters/prisma";
-import { admin, twoFactor } from "better-auth/plugins";
+import {
+  admin as adminPlugin,
+  organization,
+  twoFactor,
+} from "better-auth/plugins";
+import { ac, admin, user } from "@/lib/auth/permissions";
 
 import { sendExistingUserEmail } from "../emails/send-existing-user-email";
 import { sendPasswordResetEmail } from "../emails/send-password-reset-email";
@@ -65,5 +70,16 @@ export const auth = betterAuth({
       await sendEmailVerificationEmail({ user, url });
     },
   },
-  plugins: [nextCookies(), twoFactor(), admin()],
+  plugins: [
+    nextCookies(),
+    twoFactor(),
+    adminPlugin({
+      ac,
+      roles: {
+        admin,
+        user,
+      },
+    }),
+    organization(),
+  ],
 });
