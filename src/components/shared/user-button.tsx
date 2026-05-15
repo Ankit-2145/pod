@@ -10,7 +10,7 @@ import {
   MoonIcon,
   SunIcon,
 } from "lucide-react";
-import { LogOutButton } from "@/components/user/log-out-button";
+import { LogOutButton } from "@/features/auth/components/log-out-button";
 // import { Badge } from "@/components/ui/badge";
 import {
   DropdownMenu,

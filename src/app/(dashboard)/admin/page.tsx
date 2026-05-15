@@ -13,7 +13,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { UserRow } from "@/features/admin/user-row";
+import { UserRow } from "@/features/admin/components/user-row";
 import { auth } from "@/lib/auth/auth";
 import { requireAuth } from "@/lib/auth/auth-check";
 import { Users } from "lucide-react";

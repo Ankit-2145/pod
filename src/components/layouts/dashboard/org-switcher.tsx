@@ -20,8 +20,8 @@ import {
 
 import { authClient } from "@/lib/auth/auth-client";
 
-import { OrganizationSelect } from "./organization-select";
-import { CreateOrganizationButton } from "./create-organization-button";
+import { OrganizationSelect } from "../../../features/organizations/components/organization-select";
+import { CreateOrganizationButton } from "../../../features/organizations/components/create-organization-button";
 
 export function TeamSwitcher() {
   const { isMobile } = useSidebar();

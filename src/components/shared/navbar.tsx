@@ -20,8 +20,8 @@ import {
 import { cn } from "@/lib/utils";
 import { authClient } from "@/lib/auth/auth-client";
 
-import { UserButton } from "@/components/user/user-button";
-import { LogOutButton } from "@/components/user/log-out-button";
+import { LogOutButton } from "@/features/auth/components/log-out-button";
+import { UserButton } from "./user-button";
 
 interface NavItemProps {
   label: string;

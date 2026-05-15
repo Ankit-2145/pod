@@ -33,7 +33,7 @@ import { MoreHorizontal, Building2 } from "lucide-react";
 import { authClient } from "@/lib/auth/auth-client";
 import { toast } from "sonner";
 
-export default function AllOrg() {
+export default function Organizations() {
   const { data: organizations } = authClient.useListOrganizations();
 
   async function onDeleteOrg(organizationId: string) {

@@ -13,6 +13,7 @@ import { sendExistingUserEmail } from "../emails/send-existing-user-email";
 import { sendPasswordResetEmail } from "../emails/send-password-reset-email";
 import { sendEmailVerificationEmail } from "../emails/send-email-verification-email";
 import { sendDeleteAccountVerificationEmail } from "../emails/send-delete-account-verification-email";
+import { sendOrganizationInviteEmail } from "../emails/organization-invite-email";
 // import { sendChangeEmailConfirmationEmail } from "../emails/send-change-email-confirmation-email";
 
 export const auth = betterAuth({
@@ -71,7 +72,6 @@ export const auth = betterAuth({
     },
   },
   plugins: [
-    nextCookies(),
     twoFactor(),
     adminPlugin({
       ac,
@@ -80,6 +80,48 @@ export const auth = betterAuth({
         user,
       },
     }),
-    organization(),
+    organization({
+      sendInvitationEmail: async ({
+        email,
+        organization,
+        inviter,
+        invitation,
+      }) => {
+        await sendOrganizationInviteEmail({
+          invitation,
+          inviter: inviter.user,
+          organization,
+          email,
+        });
+      },
+    }),
+    nextCookies(),
   ],
+
+  databaseHooks: {
+    session: {
+      create: {
+        before: async (userSession) => {
+          const membership = await prisma.member.findFirst({
+            where: {
+              userId: userSession.userId,
+            },
+            orderBy: {
+              createdAt: "desc",
+            },
+            select: {
+              organizationId: true,
+            },
+          });
+
+          return {
+            data: {
+              ...userSession,
+              activeOrganizationId: membership?.organizationId,
+            },
+          };
+        },
+      },
+    },
+  },
 });

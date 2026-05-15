@@ -13,15 +13,15 @@ import {
   UserRound,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ProfileUpdateForm } from "@/features/user-management/profile/profile-update-form";
-import { SecurityTab } from "@/features/user-management/security/security-tab";
-import { SessionsTab } from "@/features/user-management/security/session-tab";
-import { LinkedAccountsTab } from "@/features/user-management/account/linked-accounts-tab";
-import { AccountDeletion } from "@/features/user-management/account/account-deletion";
-import { Button } from "@/components/ui/button";
+import { ProfileUpdateForm } from "@/features/settings/profile/profile-update-form";
+import { SecurityTab } from "@/features/settings/security/security-tab";
+import { SessionsTab } from "@/features/settings/security/session-tab";
+import { LinkedAccountsTab } from "@/features/settings/account/linked-accounts-tab";
+import { AccountDeletion } from "@/features/settings/account/account-deletion";
 
 export default async function ProfilePage() {
   const session = await requireAuth();

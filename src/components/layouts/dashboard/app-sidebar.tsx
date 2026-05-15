@@ -1,12 +1,12 @@
 "use client";
 
 import * as React from "react";
-import { Building2Icon, Frame, Map, PieChart, Users2Icon } from "lucide-react";
+import { Building2Icon, Frame, Users2Icon } from "lucide-react";
 
 import { NavMain } from "./nav-main";
 import { NavProjects } from "./nav-projects";
 import { NavUser } from "./nav-user";
-import { TeamSwitcher } from "./team-switcher";
+import { TeamSwitcher } from "./org-switcher";
 import {
   Sidebar,
   SidebarContent,
@@ -14,7 +14,6 @@ import {
   SidebarHeader,
   SidebarRail,
 } from "@/components/ui/sidebar";
-import { authClient } from "@/lib/auth/auth-client";
 
 // This is sample data.
 const data = {
@@ -28,24 +27,19 @@ const data = {
 
     {
       title: "Organizations",
-      url: "#",
       icon: Building2Icon,
       items: [
         {
           title: "All Organizations",
-          url: "/admin/all-org",
+          url: "/admin/organizations",
         },
         {
-          title: "Team",
-          url: "#",
+          title: "Members",
+          url: "/admin/organizations/members",
         },
         {
-          title: "Billing",
-          url: "#",
-        },
-        {
-          title: "Limits",
-          url: "#",
+          title: "Invitations",
+          url: "/admin/organizations/invitations",
         },
       ],
     },
@@ -56,22 +50,10 @@ const data = {
       url: "/admin/organization",
       icon: Frame,
     },
-    {
-      name: "Sales & Marketing",
-      url: "#",
-      icon: PieChart,
-    },
-    {
-      name: "Travel",
-      url: "#",
-      icon: Map,
-    },
   ],
 };
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
-  const { data: session } = authClient.useSession();
-
   return (
     <Sidebar collapsible="icon" {...props}>
       <SidebarHeader>
@@ -82,7 +64,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <NavProjects projects={data.projects} />
       </SidebarContent>
       <SidebarFooter>
-        <NavUser user={session?.user ?? { name: "", email: "" }} />
+        <NavUser />
       </SidebarFooter>
       <SidebarRail />
     </Sidebar>

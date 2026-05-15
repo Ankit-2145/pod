@@ -2,11 +2,10 @@
 
 import {
   BadgeCheck,
-  Bell,
-  ChevronsUpDown,
+  ChevronsUpDownIcon,
   CreditCard,
-  LogOut,
-  Sparkles,
+  HomeIcon,
+  LogOutIcon,
 } from "lucide-react";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -25,17 +24,13 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar";
+import { authClient } from "@/lib/auth/auth-client";
+import { LogOutButton } from "@/features/auth/components/log-out-button";
 
-export function NavUser({
-  user,
-}: {
-  user: {
-    name: string;
-    email: string;
-    avatar?: string;
-  };
-}) {
+export function NavUser() {
   const { isMobile } = useSidebar();
+  const { data: session } = authClient.useSession();
+  const userInitial = session?.user?.name?.charAt(0).toUpperCase() || "U";
 
   return (
     <SidebarMenu>
@@ -46,15 +41,22 @@ export function NavUser({
               size="lg"
               className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
             >
-              <Avatar className="h-8 w-8 rounded-lg">
-                <AvatarImage src={user.avatar} alt={user.name} />
-                <AvatarFallback className="rounded-lg">CN</AvatarFallback>
+              <Avatar className="h-8 w-8">
+                <AvatarImage
+                  src={session?.user?.image || ""}
+                  alt={session?.user?.name || "User"}
+                />
+                <AvatarFallback className="bg-primary/10 text-primary font-semibold text-xs">
+                  {userInitial}
+                </AvatarFallback>
               </Avatar>
               <div className="grid flex-1 text-left text-sm leading-tight">
-                <span className="truncate font-medium">{user.name}</span>
-                <span className="truncate text-xs">{user.email}</span>
+                <span className="truncate font-medium">
+                  {session?.user.name}
+                </span>
+                <span className="truncate text-xs">{session?.user.email}</span>
               </div>
-              <ChevronsUpDown className="ml-auto size-4" />
+              <ChevronsUpDownIcon className="ml-auto size-4" />
             </SidebarMenuButton>
           </DropdownMenuTrigger>
           <DropdownMenuContent
@@ -65,25 +67,32 @@ export function NavUser({
           >
             <DropdownMenuLabel className="p-0 font-normal">
               <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
-                <Avatar className="h-8 w-8 rounded-lg">
-                  <AvatarImage src={user.avatar} alt={user.name} />
-                  <AvatarFallback className="rounded-lg">CN</AvatarFallback>
+                <Avatar className="h-8 w-8">
+                  <AvatarImage
+                    src={session?.user?.image || ""}
+                    alt={session?.user?.name || "User"}
+                  />
+                  <AvatarFallback className="bg-primary/10 text-primary font-semibold text-xs">
+                    {userInitial}
+                  </AvatarFallback>
                 </Avatar>
                 <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-medium">{user.name}</span>
-                  <span className="truncate text-xs">{user.email}</span>
+                  <span className="truncate font-medium">
+                    {session?.user.name}
+                  </span>
+                  <span className="truncate text-xs">
+                    {session?.user.email}
+                  </span>
                 </div>
               </div>
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
+
             <DropdownMenuGroup>
               <DropdownMenuItem>
-                <Sparkles />
-                Upgrade to Pro
+                <HomeIcon />
+                Home
               </DropdownMenuItem>
-            </DropdownMenuGroup>
-            <DropdownMenuSeparator />
-            <DropdownMenuGroup>
               <DropdownMenuItem>
                 <BadgeCheck />
                 Account
@@ -92,16 +101,14 @@ export function NavUser({
                 <CreditCard />
                 Billing
               </DropdownMenuItem>
-              <DropdownMenuItem>
-                <Bell />
-                Notifications
-              </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>
-              <LogOut />
-              Log out
-            </DropdownMenuItem>
+            <LogOutButton>
+              <DropdownMenuItem className="flex items-center gap-2 cursor-pointer text-destructive focus:text-destructive">
+                <LogOutIcon className="h-4 w-4" />
+                <span className="text-sm">Log out</span>
+              </DropdownMenuItem>
+            </LogOutButton>
           </DropdownMenuContent>
         </DropdownMenu>
       </SidebarMenuItem>

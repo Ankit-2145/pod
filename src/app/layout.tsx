@@ -5,7 +5,7 @@ import "./globals.css";
 import { TRPCReactProvider } from "@/trpc/client";
 import { Toaster } from "@/components/ui/sonner";
 import { ThemeProvider } from "@/components/providers/theme-provider";
-import { ImpersonationIndicator } from "@/features/admin/impersonation-indicator";
+import { ImpersonationIndicator } from "@/features/admin/components/impersonation-indicator";
 
 const fontSans = Inter({
   subsets: ["latin"],

@@ -38,7 +38,7 @@ export function UserRow({
   const router = useRouter();
   const isSelf = user.id === selfId;
 
-  function handleAdmin(userId: string) {
+  function onAdmin(userId: string) {
     authClient.admin.setRole(
       {
         userId,
@@ -56,7 +56,7 @@ export function UserRow({
     );
   }
 
-  function handleImpersonateUser(userId: string) {
+  function onImpersonateUser(userId: string) {
     authClient.admin.impersonateUser(
       { userId },
       {
@@ -71,7 +71,7 @@ export function UserRow({
     );
   }
 
-  function handleBanUser(userId: string) {
+  function onBanUser(userId: string) {
     authClient.admin.banUser(
       { userId },
       {
@@ -86,7 +86,7 @@ export function UserRow({
     );
   }
 
-  function handleUnbanUser(userId: string) {
+  function onUnbanUser(userId: string) {
     authClient.admin.unbanUser(
       { userId },
       {
@@ -101,7 +101,7 @@ export function UserRow({
     );
   }
 
-  function handleRevokeSessions(userId: string) {
+  function onRevokeSessions(userId: string) {
     authClient.admin.revokeUserSessions(
       { userId },
       {
@@ -115,7 +115,7 @@ export function UserRow({
     );
   }
 
-  function handleRemoveUser(userId: string) {
+  function onRemoveUser(userId: string) {
     authClient.admin.removeUser(
       { userId },
       {
@@ -163,23 +163,21 @@ export function UserRow({
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent>
-                <DropdownMenuItem onClick={() => handleAdmin(user.id)}>
+                <DropdownMenuItem onClick={() => onAdmin(user.id)}>
                   {user.role === "admin" ? "Remove Admin" : "Make Admin"}
                 </DropdownMenuItem>
-                <DropdownMenuItem
-                  onClick={() => handleImpersonateUser(user.id)}
-                >
+                <DropdownMenuItem onClick={() => onImpersonateUser(user.id)}>
                   Impersonate
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => handleRevokeSessions(user.id)}>
+                <DropdownMenuItem onClick={() => onRevokeSessions(user.id)}>
                   Revoke Sessions
                 </DropdownMenuItem>
                 {user.banned ? (
-                  <DropdownMenuItem onClick={() => handleUnbanUser(user.id)}>
+                  <DropdownMenuItem onClick={() => onUnbanUser(user.id)}>
                     Unban User
                   </DropdownMenuItem>
                 ) : (
-                  <DropdownMenuItem onClick={() => handleBanUser(user.id)}>
+                  <DropdownMenuItem onClick={() => onBanUser(user.id)}>
                     Ban User
                   </DropdownMenuItem>
                 )}
@@ -203,7 +201,7 @@ export function UserRow({
               <AlertDialogFooter>
                 <AlertDialogCancel>Cancel</AlertDialogCancel>
                 <AlertDialogAction
-                  onClick={() => handleRemoveUser(user.id)}
+                  onClick={() => onRemoveUser(user.id)}
                   className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                 >
                   Delete
