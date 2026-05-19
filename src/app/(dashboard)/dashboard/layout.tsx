@@ -1,24 +1,24 @@
-import { AdminSidebar } from "@/components/layouts/sidebar/admin/admin-sidebar";
-import { DashboardBreadcrumb } from "@/components/layouts/sidebar/admin/dashboard-breadcrumb";
+import { DashboardSidebar } from "@/components/layouts/sidebar/dashboard/dashboard-sidebar";
+import { DashboardBreadcrumb } from "@/components/layouts/sidebar/dashboard/dashboard-breadcrumb";
 import { Separator } from "@/components/ui/separator";
 import {
   SidebarInset,
   SidebarProvider,
   SidebarTrigger,
 } from "@/components/ui/sidebar";
-import { requireAdmin } from "@/lib/auth/auth-check";
+import { requireAuth } from "@/lib/auth/auth-check";
 
-export default async function AdminLayout({
+export default async function DashboardLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  await requireAdmin();
+  await requireAuth();
 
   return (
     <>
       <SidebarProvider>
-        <AdminSidebar />
+        <DashboardSidebar />
 
         <SidebarInset>
           <header className="flex h-16 shrink-0 items-center gap-2 border-b">

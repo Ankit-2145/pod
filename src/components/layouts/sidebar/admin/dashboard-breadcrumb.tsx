@@ -22,7 +22,7 @@ export function DashboardBreadcrumb() {
       <BreadcrumbList>
         <BreadcrumbItem>
           <BreadcrumbLink asChild>
-            <Link href="/admin">Admin</Link>
+            <Link href={`${paths[0]}`}>{paths[0]}</Link>
           </BreadcrumbLink>
         </BreadcrumbItem>
 

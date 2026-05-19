@@ -24,12 +24,15 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { useTheme } from "next-themes";
+import { Badge } from "../ui/badge";
 
 export const UserButton = () => {
   const { data: session } = authClient.useSession();
   const { theme, setTheme } = useTheme();
 
   const userInitial = session?.user?.name?.charAt(0).toUpperCase() || "U";
+
+  const { data: activeOrg } = authClient.useActiveOrganization();
 
   return (
     <DropdownMenu>
@@ -80,9 +83,9 @@ export const UserButton = () => {
             </div>
           </div>
           {/* Uncomment if you want the badge */}
-          {/* <Badge variant="secondary" className="mt-2 w-fit text-xs">
-            Student
-          </Badge> */}
+          <Badge variant="secondary" className="mt-2 w-fit text-xs">
+            {activeOrg?.name}
+          </Badge>
         </div>
 
         <DropdownMenuSeparator className="my-2" />
