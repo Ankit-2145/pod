@@ -1,6 +1,5 @@
+import { courseRouter } from "@/features/course/server/course.router";
 import { createTRPCRouter } from "../init";
-
-import { courseRouter } from "./course";
 
 export const appRouter = createTRPCRouter({
   course: courseRouter,

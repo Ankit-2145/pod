@@ -28,6 +28,7 @@ model User {
 
   members     Member[]
   invitations Invitation[]
+  courses     Course[]
 
   @@unique([email])
   @@map("user")
@@ -153,6 +154,9 @@ model Course {
   price            Float?
   originalPrice    Float?
   isPublished      Boolean @default(false)
+
+  authorId String?
+  author   User?   @relation(fields: [authorId], references: [id])
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt()

@@ -22,7 +22,9 @@ export function DashboardBreadcrumb() {
       <BreadcrumbList>
         <BreadcrumbItem>
           <BreadcrumbLink asChild>
-            <Link href={`${paths[0]}`}>{paths[0]}</Link>
+            <Link href={`/${paths[0]}`}>
+              {paths[0].charAt(0).toUpperCase() + paths[0].slice(1)}
+            </Link>
           </BreadcrumbLink>
         </BreadcrumbItem>
 
@@ -37,7 +39,6 @@ export function DashboardBreadcrumb() {
           return (
             <div key={path} className="flex items-center">
               <BreadcrumbSeparator />
-
               <BreadcrumbItem>
                 {isLast ? (
                   <BreadcrumbPage>{formattedName}</BreadcrumbPage>
