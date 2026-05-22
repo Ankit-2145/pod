@@ -21,7 +21,7 @@ const data = {
     {
       title: "Courses",
       icon: BookOpenIcon,
-
+      isActive: true,
       items: [
         {
           title: "All Courses",
