@@ -155,6 +155,9 @@ model Course {
   originalPrice    Float?
   isPublished      Boolean @default(false)
 
+  categoryId String?
+  category   Category? @relation(fields: [categoryId], references: [id])
+
   authorId String?
   author   User?   @relation(fields: [authorId], references: [id])
 
@@ -162,4 +165,18 @@ model Course {
   updatedAt DateTime @updatedAt()
 
   @@index([title])
+}
+
+model Category {
+  id String @id @default(cuid())
+
+  name String @unique
+  slug String @unique
+
+  isActive Boolean @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  courses Course[]
 }

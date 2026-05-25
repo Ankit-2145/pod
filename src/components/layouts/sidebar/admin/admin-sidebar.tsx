@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Building2Icon, Frame, Users2Icon } from "lucide-react";
+import { Building2Icon, FolderIcon, Users2Icon } from "lucide-react";
 
 import { NavMain } from "./nav-main";
 import { NavProjects } from "./nav-projects";
@@ -46,9 +46,9 @@ const data = {
   ],
   projects: [
     {
-      name: "Manage Organizations",
-      url: "/admin/organization",
-      icon: Frame,
+      name: "Categories",
+      url: "/admin/categories",
+      icon: FolderIcon,
     },
   ],
 };

@@ -2,25 +2,26 @@
 
 import * as z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
-
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormMessage,
-} from "@/components/ui/form";
+import { Controller, useForm } from "react-hook-form";
 
 import { Pencil } from "lucide-react";
+
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 
+import {
+  Field,
+  FieldError,
+  FieldGroup,
+  FieldLabel,
+} from "@/components/ui/field";
+
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+
 import { toast } from "sonner";
 
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+
 import { useTRPC } from "@/trpc/client";
 
 interface TitleFormProps {
@@ -31,33 +32,41 @@ interface TitleFormProps {
   courseId: string;
 }
 
-const formSchema = z.object({
+const titleFormSchema = z.object({
   title: z.string().min(1, {
     message: "Title is required",
   }),
 });
+
+type TitleFormValues = z.infer<typeof titleFormSchema>;
 
 export const TitleForm = ({ initialData, courseId }: TitleFormProps) => {
   const [isEditing, setIsEditing] = useState(false);
 
   const toggleEdit = () => setIsEditing((current) => !current);
 
-  const router = useRouter();
   const trpc = useTRPC();
 
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
+  const queryClient = useQueryClient();
+
+  const form = useForm<TitleFormValues>({
+    resolver: zodResolver(titleFormSchema),
+
     defaultValues: initialData,
   });
 
   const updateTitle = useMutation(
     trpc.course.updateTitle.mutationOptions({
-      onSuccess: () => {
+      onSuccess: async () => {
         toast.success("Course title updated");
 
-        toggleEdit();
+        await queryClient.invalidateQueries(
+          trpc.course.getById.queryFilter({
+            courseId,
+          }),
+        );
 
-        router.refresh();
+        toggleEdit();
       },
 
       onError: (error) => {
@@ -66,16 +75,18 @@ export const TitleForm = ({ initialData, courseId }: TitleFormProps) => {
     }),
   );
 
-  const onSubmit = async (values: z.infer<typeof formSchema>) => {
+  const onUpdateTitle = async (values: TitleFormValues) => {
     await updateTitle.mutateAsync({
       courseId,
+
       title: values.title,
     });
   };
 
-  const isSubmitting = form.formState.isSubmitting || updateTitle.isPending;
-
-  const isValid = form.formState.isValid;
+  const isPending =
+    !form.formState.isValid ||
+    form.formState.isSubmitting ||
+    updateTitle.isPending;
 
   return (
     <div className="mt-6 rounded-md border border-blue-100 p-2">
@@ -98,36 +109,41 @@ export const TitleForm = ({ initialData, courseId }: TitleFormProps) => {
       )}
 
       {isEditing && (
-        <Form {...form}>
-          <form
-            onSubmit={form.handleSubmit(onSubmit)}
-            className="mt-4 space-y-4"
-          >
-            <FormField
-              control={form.control}
+        <form
+          id="course-title-form"
+          onSubmit={form.handleSubmit(onUpdateTitle)}
+          className="mt-4 space-y-4"
+        >
+          <FieldGroup>
+            <Controller
               name="title"
-              render={({ field }) => (
-                <FormItem>
-                  <FormControl>
-                    <Input
-                      disabled={isSubmitting}
-                      placeholder="e.g. 'Advanced web development'"
-                      {...field}
-                    />
-                  </FormControl>
+              control={form.control}
+              render={({ field, fieldState }) => (
+                <Field data-invalid={fieldState.invalid}>
+                  <FieldLabel htmlFor={field.name}>Title</FieldLabel>
 
-                  <FormMessage />
-                </FormItem>
+                  <Input
+                    {...field}
+                    id="title"
+                    aria-invalid={fieldState.invalid}
+                    placeholder="Course Title"
+                    type="text"
+                  />
+
+                  {fieldState.invalid && (
+                    <FieldError errors={[fieldState.error]} />
+                  )}
+                </Field>
               )}
             />
 
-            <div className="flex items-center gap-x-2">
-              <Button disabled={!isValid || isSubmitting} type="submit">
+            <Field>
+              <Button type="submit" className="w-full" disabled={isPending}>
                 Save
               </Button>
-            </div>
-          </form>
-        </Form>
+            </Field>
+          </FieldGroup>
+        </form>
       )}
     </div>
   );

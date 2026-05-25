@@ -25,6 +25,52 @@ export const courseRouter = createTRPCRouter({
       return course;
     }),
 
+  getById: instructorProcedure
+    .input(
+      z.object({
+        courseId: z.string(),
+      }),
+    )
+    .query(async ({ ctx, input }) => {
+      const course = await ctx.prisma.course.findUnique({
+        where: {
+          id: input.courseId,
+        },
+      });
+
+      if (!course) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+        });
+      }
+
+      const isOwner = course.authorId === ctx.user.id;
+
+      const isAdmin = ctx.user.role === "admin";
+
+      if (!isOwner && !isAdmin) {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+        });
+      }
+
+      return course;
+    }),
+  getMany: instructorProcedure.query(async ({ ctx }) => {
+    const isAdmin = ctx.user.role === "admin";
+
+    return ctx.prisma.course.findMany({
+      where: isAdmin
+        ? {}
+        : {
+            authorId: ctx.user.id,
+          },
+
+      orderBy: {
+        createdAt: "desc",
+      },
+    });
+  }),
   updateTitle: instructorProcedure
     .input(
       z.object({
@@ -69,5 +115,230 @@ export const courseRouter = createTRPCRouter({
       });
 
       return updatedCourse;
+    }),
+  updateShortDescription: instructorProcedure
+    .input(
+      z.object({
+        courseId: z.string(),
+
+        shortDescription: z.string().min(1).max(200),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const course = await ctx.prisma.course.findUnique({
+        where: {
+          id: input.courseId,
+        },
+      });
+
+      if (!course) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+        });
+      }
+
+      const isOwner = course.authorId === ctx.user.id;
+
+      const isAdmin = ctx.user.role === "ADMIN";
+
+      if (!isOwner && !isAdmin) {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+        });
+      }
+
+      return ctx.prisma.course.update({
+        where: {
+          id: input.courseId,
+        },
+
+        data: {
+          shortDescription: input.shortDescription,
+        },
+      });
+    }),
+
+  updateDescription: instructorProcedure
+    .input(
+      z.object({
+        courseId: z.string(),
+        description: z.string().min(1, {
+          message: "Description is required",
+        }),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const course = await ctx.prisma.course.findUnique({
+        where: {
+          id: input.courseId,
+        },
+      });
+
+      if (!course) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+        });
+      }
+
+      const isOwner = course.authorId === ctx.user.id;
+
+      const isAdmin = ctx.user.role === "ADMIN";
+
+      if (!isOwner && !isAdmin) {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+        });
+      }
+
+      const updatedCourse = await ctx.prisma.course.update({
+        where: {
+          id: input.courseId,
+        },
+
+        data: {
+          description: input.description,
+        },
+      });
+
+      return updatedCourse;
+    }),
+  updateImage: instructorProcedure
+    .input(
+      z.object({
+        courseId: z.string(),
+        imageUrl: z.url(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const course = await ctx.prisma.course.findUnique({
+        where: {
+          id: input.courseId,
+        },
+      });
+
+      if (!course) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+        });
+      }
+
+      const isOwner = course.authorId === ctx.user.id;
+
+      const isAdmin = ctx.user.role === "ADMIN";
+
+      if (!isOwner && !isAdmin) {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+        });
+      }
+
+      return ctx.prisma.course.update({
+        where: {
+          id: input.courseId,
+        },
+
+        data: {
+          imageUrl: input.imageUrl,
+        },
+      });
+    }),
+  updateCategory: instructorProcedure
+    .input(
+      z.object({
+        courseId: z.string(),
+
+        categoryId: z.string(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const course = await ctx.prisma.course.findUnique({
+        where: {
+          id: input.courseId,
+        },
+      });
+
+      if (!course) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+        });
+      }
+
+      const isOwner = course.authorId === ctx.user.id;
+
+      const isAdmin = ctx.user.role === "ADMIN";
+
+      if (!isOwner && !isAdmin) {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+        });
+      }
+
+      return ctx.prisma.course.update({
+        where: {
+          id: input.courseId,
+        },
+
+        data: {
+          categoryId: input.categoryId,
+        },
+      });
+    }),
+
+  updatePrice: instructorProcedure
+    .input(
+      z.object({
+        courseId: z.string(),
+
+        originalPrice: z.number().nullable(),
+
+        price: z.number().nullable(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const course = await ctx.prisma.course.findUnique({
+        where: {
+          id: input.courseId,
+        },
+      });
+
+      if (!course) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+        });
+      }
+
+      const isOwner = course.authorId === ctx.user.id;
+
+      const isAdmin = ctx.user.role === "ADMIN";
+
+      if (!isOwner && !isAdmin) {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+        });
+      }
+
+      if (
+        input.price !== null &&
+        input.originalPrice !== null &&
+        input.price > input.originalPrice
+      ) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+
+          message: "Discount price cannot be greater than original price",
+        });
+      }
+
+      return ctx.prisma.course.update({
+        where: {
+          id: input.courseId,
+        },
+
+        data: {
+          originalPrice: input.originalPrice,
+
+          price: input.price,
+        },
+      });
     }),
 });

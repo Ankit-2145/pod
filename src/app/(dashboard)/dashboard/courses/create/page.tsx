@@ -1,4 +1,4 @@
-import { CreateCourseForm } from "@/features/course/components/create-course-form";
+import { CreateCourseForm } from "@/features/course/components/create-form";
 
 export default async function CreateCoursePage() {
   return (

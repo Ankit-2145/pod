@@ -1,52 +1,23 @@
-import Link from "next/link";
+import { redirect } from "next/navigation";
 
-import prisma from "@/lib/db/prisma";
 import { requireAuth } from "@/lib/auth/auth-check";
 
-import { Button } from "@/components/ui/button";
-import { DataTable } from "@/components/layouts/data-table";
-import { columns } from "@/components/layouts/columns";
+import { HydrateClient, prefetch, trpc } from "@/trpc/server";
+import { canManageCourses } from "@/lib/course/permissions";
+import { CoursesView } from "@/features/course/components/course-view";
 
 export default async function CoursePage() {
   const session = await requireAuth();
 
-  const isInstructor = session.user.role === "INSTRUCTOR";
-
-  const isAdmin = session.user.role === "admin";
-
-  if (!isInstructor && !isAdmin) {
-    return (
-      <section className="p-4">
-        <h1 className="mb-4 text-2xl font-bold">
-          You are not authorized to view this page
-        </h1>
-      </section>
-    );
+  if (!canManageCourses(session.user.role)) {
+    redirect("/dashboard");
   }
 
-  const courses = await prisma.course.findMany({
-    where: isAdmin
-      ? {}
-      : {
-          authorId: session.user.id,
-        },
-
-    orderBy: {
-      createdAt: "desc",
-    },
-  });
+  prefetch(trpc.course.getMany.queryOptions());
 
   return (
-    <div className="p-6">
-      <div className="mb-6 flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold">Courses</h1>
-
-          <p className="text-sm text-muted-foreground">Manage your courses</p>
-        </div>
-      </div>
-
-      <DataTable columns={columns} data={courses} />
-    </div>
+    <HydrateClient>
+      <CoursesView />
+    </HydrateClient>
   );
 }
