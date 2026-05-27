@@ -13,7 +13,7 @@ import { ShortDescriptionForm } from "./short-description-form";
 import { DescriptionForm } from "./description-form";
 import { ImageForm } from "./image-form";
 import { CategoryForm } from "./category-form";
-import { PriceForm } from "./price-form";
+// import { PriceForm } from "./price-form";
 
 interface EditorProps {
   courseId: string;
@@ -128,7 +128,7 @@ export function Editor({ courseId }: EditorProps) {
             </CardHeader>
 
             <CardContent className="space-y-6">
-              <PriceForm initialData={course} courseId={courseId} />
+              {/* <PriceForm initialData={course} courseId={courseId} /> */}
             </CardContent>
           </Card>
         </div>
