@@ -13,7 +13,9 @@ import { ShortDescriptionForm } from "./short-description-form";
 import { DescriptionForm } from "./description-form";
 import { ImageForm } from "./image-form";
 import { CategoryForm } from "./category-form";
-// import { PriceForm } from "./price-form";
+import { PriceForm } from "./price-form";
+import { Actions } from "./actions";
+import { ChaptersForm } from "./chapter-form";
 
 interface EditorProps {
   courseId: string;
@@ -35,6 +37,7 @@ export function Editor({ courseId }: EditorProps) {
   const completedFields = requiredFields.filter(Boolean).length;
 
   const completionText = `(${completedFields}/${totalFields})`;
+  const isComplete = requiredFields.every(Boolean);
 
   return (
     <main className="flex-1">
@@ -46,8 +49,12 @@ export function Editor({ courseId }: EditorProps) {
             Complete all fields {completionText}
           </p>
         </div>
-
-        <div className="grid gap-6 grid-cols-1">
+        <Actions
+          disabled={!isComplete}
+          courseId={courseId}
+          isPublished={course.isPublished}
+        />
+        <div className="grid gap-6 grid-cols-2">
           <Card className="gap-0">
             <CardHeader>
               <div className="flex items-center gap-2">
@@ -128,7 +135,21 @@ export function Editor({ courseId }: EditorProps) {
             </CardHeader>
 
             <CardContent className="space-y-6">
-              {/* <PriceForm initialData={course} courseId={courseId} /> */}
+              <PriceForm initialData={course} courseId={courseId} />
+            </CardContent>
+          </Card>
+
+          <Card className="gap-0">
+            <CardHeader>
+              <div className="flex items-center gap-2">
+                <LayoutDashboard className="h-5 w-5" />
+
+                <CardTitle>Chapters</CardTitle>
+              </div>
+            </CardHeader>
+
+            <CardContent className="space-y-6">
+              <ChaptersForm initialData={course} courseId={courseId} />
             </CardContent>
           </Card>
         </div>

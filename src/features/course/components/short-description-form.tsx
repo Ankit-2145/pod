@@ -150,8 +150,7 @@ export function ShortDescriptionForm({
                     {...field}
                     id="shortDescription"
                     aria-invalid={fieldState.invalid}
-                    disabled={isPending}
-                    placeholder="e.g. Best for UG/PG students"
+                    placeholder="e.g. A comprehensive course on React development"
                   />
 
                   {fieldState.invalid && (

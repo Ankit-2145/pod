@@ -36,6 +36,13 @@ export const courseRouter = createTRPCRouter({
         where: {
           id: input.courseId,
         },
+        include: {
+          chapters: {
+            orderBy: {
+              position: "asc",
+            },
+          },
+        },
       });
 
       if (!course) {
@@ -340,5 +347,135 @@ export const courseRouter = createTRPCRouter({
           price: input.price,
         },
       });
+    }),
+
+  publish: instructorProcedure
+    .input(
+      z.object({
+        courseId: z.string(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const course = await ctx.prisma.course.findUnique({
+        where: {
+          id: input.courseId,
+        },
+      });
+
+      if (!course) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Course not found",
+        });
+      }
+
+      const isOwner = course.authorId === ctx.user.id;
+
+      const isAdmin = ctx.user.role === "ADMIN";
+
+      if (!isOwner && !isAdmin) {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "Unauthorized",
+        });
+      }
+
+      const updatedCourse = await ctx.prisma.course.update({
+        where: {
+          id: input.courseId,
+        },
+
+        data: {
+          isPublished: true,
+        },
+      });
+
+      return updatedCourse;
+    }),
+
+  unpublish: instructorProcedure
+    .input(
+      z.object({
+        courseId: z.string(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const course = await ctx.prisma.course.findUnique({
+        where: {
+          id: input.courseId,
+        },
+      });
+
+      if (!course) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Course not found",
+        });
+      }
+
+      const isOwner = course.authorId === ctx.user.id;
+
+      const isAdmin = ctx.user.role === "ADMIN";
+
+      if (!isOwner && !isAdmin) {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "Unauthorized",
+        });
+      }
+
+      const updatedCourse = await ctx.prisma.course.update({
+        where: {
+          id: input.courseId,
+        },
+
+        data: {
+          isPublished: false,
+        },
+      });
+
+      return updatedCourse;
+    }),
+
+  delete: instructorProcedure
+    .input(
+      z.object({
+        courseId: z.string(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const course = await ctx.prisma.course.findUnique({
+        where: {
+          id: input.courseId,
+        },
+      });
+
+      if (!course) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Course not found",
+        });
+      }
+
+      const isOwner = course.authorId === ctx.user.id;
+
+      const isAdmin = ctx.user.role === "admin";
+
+      if (!isOwner && !isAdmin) {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "Unauthorized",
+        });
+      }
+
+      await ctx.prisma.course.delete({
+        where: {
+          id: input.courseId,
+        },
+      });
+
+      return {
+        success: true,
+      };
     }),
 });
