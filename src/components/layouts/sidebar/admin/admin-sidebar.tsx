@@ -1,7 +1,13 @@
 "use client";
 
 import * as React from "react";
-import { Building2Icon, FolderIcon, Users2Icon } from "lucide-react";
+import {
+  Building2Icon,
+  Columns3CogIcon,
+  FolderIcon,
+  UserRoundCogIcon,
+  Users2Icon,
+} from "lucide-react";
 
 import { NavMain } from "./nav-main";
 import { NavProjects } from "./nav-projects";
@@ -15,14 +21,30 @@ import {
   SidebarRail,
 } from "@/components/ui/sidebar";
 
-// This is sample data.
 const data = {
+  courses: [
+    {
+      name: "Admin Dashboard",
+      url: "/admin",
+      icon: Columns3CogIcon,
+    },
+    {
+      name: "Categories",
+      url: "/admin/categories",
+      icon: FolderIcon,
+    },
+  ],
   navMain: [
     {
-      title: "List all Users",
-      url: "#",
-      icon: Users2Icon,
-      isActive: true,
+      title: "User Management",
+      icon: UserRoundCogIcon,
+      items: [
+        {
+          title: "All Users",
+          url: "/admin/list-all-users",
+          icon: Users2Icon,
+        },
+      ],
     },
 
     {
@@ -44,13 +66,6 @@ const data = {
       ],
     },
   ],
-  projects: [
-    {
-      name: "Categories",
-      url: "/admin/categories",
-      icon: FolderIcon,
-    },
-  ],
 };
 
 export function AdminSidebar({
@@ -62,8 +77,8 @@ export function AdminSidebar({
         <TeamSwitcher />
       </SidebarHeader>
       <SidebarContent>
+        <NavProjects projects={data.courses} />
         <NavMain items={data.navMain} />
-        <NavProjects projects={data.projects} />
       </SidebarContent>
       <SidebarFooter>
         <NavUser />

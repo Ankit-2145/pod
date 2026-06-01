@@ -21,7 +21,14 @@ export default async function DashboardPage() {
           </p>
         </div>
 
-        <DashboardCourses />
+        {session.user.role === "admin" ? (
+          <DashboardCourses />
+        ) : (
+          <p className="text-muted-foreground">
+            You do not have access to the dashboard. Please contact support if
+            you believe this is an error.
+          </p>
+        )}
       </section>
     </HydrateClient>
   );

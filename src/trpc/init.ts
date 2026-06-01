@@ -23,6 +23,7 @@ const t = initTRPC.context<Context>().create({
 export const createTRPCRouter = t.router;
 export const createCallerFactory = t.createCallerFactory;
 export const baseProcedure = t.procedure;
+
 export const protectedProcedure = baseProcedure.use(async ({ ctx, next }) => {
   if (!ctx.session) {
     throw new TRPCError({
@@ -51,3 +52,15 @@ export const instructorProcedure = protectedProcedure.use(
     return next();
   },
 );
+
+export const adminProcedure = protectedProcedure.use(async ({ ctx, next }) => {
+  const role = ctx.user.role;
+
+  if (role !== "admin") {
+    throw new TRPCError({
+      code: "FORBIDDEN",
+    });
+  }
+
+  return next();
+});

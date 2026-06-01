@@ -7,6 +7,7 @@ import { useTRPC } from "@/trpc/client";
 import { DataTable } from "@/components/layouts/data-table";
 
 import { columns } from "@/components/layouts/columns";
+import { PlusCircleIcon } from "lucide-react";
 
 export function CoursesView() {
   const trpc = useTRPC();
@@ -25,7 +26,15 @@ export function CoursesView() {
         </div>
       </div>
 
-      <DataTable columns={columns} data={courses} />
+      <DataTable
+        columns={columns}
+        data={courses}
+        searchColumn="title"
+        searchPlaceholder="Filter courses..."
+        createHref="/dashboard/courses/create"
+        createLabel="New Course"
+        createIcon={<PlusCircleIcon className="mr-2 h-4 w-4" />}
+      />
     </div>
   );
 }

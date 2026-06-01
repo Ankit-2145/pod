@@ -151,6 +151,7 @@ model Course {
   description      String? @db.Text
   shortDescription String? @db.Text
   imageUrl         String? @db.Text
+  imageFileKey     String?
   price            Float?
   originalPrice    Float?
   isPublished      Boolean @default(false)
@@ -208,9 +209,10 @@ model Chapter {
 }
 
 model Attachment {
-  id   String @id @default(uuid())
-  name String
-  url  String @db.Text
+  id      String @id @default(uuid())
+  name    String
+  url     String @db.Text
+  fileKey String
 
   chapterId String?
   chapter   Chapter? @relation(fields: [chapterId], references: [id], onDelete: Cascade)

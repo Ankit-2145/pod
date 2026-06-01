@@ -1,6 +1,7 @@
 import z from "zod";
 import { TRPCError } from "@trpc/server";
 import { createTRPCRouter, instructorProcedure } from "@/trpc/init";
+import { UTApi } from "uploadthing/server";
 
 export const courseRouter = createTRPCRouter({
   create: instructorProcedure
@@ -214,6 +215,7 @@ export const courseRouter = createTRPCRouter({
       z.object({
         courseId: z.string(),
         imageUrl: z.url(),
+        imageFileKey: z.string(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
@@ -230,8 +232,7 @@ export const courseRouter = createTRPCRouter({
       }
 
       const isOwner = course.authorId === ctx.user.id;
-
-      const isAdmin = ctx.user.role === "ADMIN";
+      const isAdmin = ctx.user.role === "admin";
 
       if (!isOwner && !isAdmin) {
         throw new TRPCError({
@@ -239,13 +240,19 @@ export const courseRouter = createTRPCRouter({
         });
       }
 
+      const utapi = new UTApi();
+
+      if (course.imageFileKey) {
+        await utapi.deleteFiles(course.imageFileKey);
+      }
+
       return ctx.prisma.course.update({
         where: {
           id: input.courseId,
         },
-
         data: {
           imageUrl: input.imageUrl,
+          imageFileKey: input.imageFileKey,
         },
       });
     }),

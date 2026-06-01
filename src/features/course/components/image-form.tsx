@@ -14,6 +14,7 @@ import { useTRPC } from "@/trpc/client";
 
 import { Button } from "@/components/ui/button";
 import { FileUpload } from "@/components/shared/file-upload";
+import { UploadedFile } from "@/types/upload";
 
 interface ImageFormProps {
   initialData: {
@@ -52,10 +53,11 @@ export function ImageForm({ initialData, courseId }: ImageFormProps) {
     }),
   );
 
-  const onUpload = async (imageUrl: string) => {
+  const onUpload = async (file: UploadedFile) => {
     await updateImage.mutateAsync({
       courseId,
-      imageUrl,
+      imageUrl: file.url,
+      imageFileKey: file.key,
     });
   };
 

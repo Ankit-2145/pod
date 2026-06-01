@@ -2,17 +2,21 @@
 
 import { Upload } from "lucide-react";
 import { toast } from "sonner";
+
 import { UploadDropzone } from "@/lib/uploadthing/uploadthing";
 import { ourFileRouter } from "@/app/api/uploadthing/core";
 
+import type { UploadedFile } from "@/types/upload";
+
 interface FileUploadProps {
-  onChange: (url: string) => void;
+  onChange: (file: UploadedFile) => void;
   endpoint: keyof typeof ourFileRouter;
 }
 
-export const FileUpload = ({ onChange, endpoint }: FileUploadProps) => {
+export function FileUpload({ onChange, endpoint }: FileUploadProps) {
   return (
     <UploadDropzone
+      endpoint={endpoint}
       appearance={{
         button:
           "ut-ready:cursor-pointer ut-ready:bg-brand ut-uploading:cursor-not-allowed ut-uploading:bg-brand/80 rounded-md after:bg-brand/60",
@@ -24,15 +28,18 @@ export const FileUpload = ({ onChange, endpoint }: FileUploadProps) => {
         uploadIcon: () => <Upload />,
         button: "Upload",
       }}
-      endpoint={endpoint}
       onClientUploadComplete={(res) => {
         if (!res?.[0]) return;
 
-        onChange(res[0].url);
+        onChange({
+          url: res[0].ufsUrl,
+          key: res[0].key,
+          name: res[0].name,
+        });
       }}
       onUploadError={() => {
-        toast.error("Error uploading file. Please try again.");
+        toast.error("Error uploading file");
       }}
     />
   );
-};
+}

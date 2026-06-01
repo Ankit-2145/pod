@@ -44,80 +44,77 @@ export function DashboardCourses() {
   return (
     <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
       {courses.map((course) => (
-        <>
-          <Card key={course.id} className="overflow-hidden">
-            {/* IMAGE */}
+        // Fixed: Removed the empty <> fragment. The key is now correctly on the Card.
+        <Card key={course.id} className="overflow-hidden">
+          {/* IMAGE */}
 
-            <div className="relative aspect-video w-full bg-muted">
-              {course.imageUrl ? (
-                <Image
-                  src={course.imageUrl}
-                  alt={course.title}
-                  fill
-                  className="object-cover"
-                />
+          <div className="relative aspect-video w-full bg-muted">
+            {course.imageUrl ? (
+              <Image
+                src={course.imageUrl}
+                alt={course.title}
+                fill
+                className="object-cover"
+              />
+            ) : (
+              <div className="flex h-full items-center justify-center">
+                <ImageIcon className="h-10 w-10 text-muted-foreground" />
+              </div>
+            )}
+          </div>
+
+          <CardHeader>
+            <div className="flex items-start justify-between gap-2">
+              <CardTitle className="line-clamp-2 text-lg">
+                {course.title}
+              </CardTitle>
+
+              <span
+                className={`rounded-full px-2 py-1 text-xs font-medium ${
+                  course.isPublished
+                    ? "bg-green-100 text-green-700"
+                    : "bg-yellow-100 text-yellow-700"
+                }`}
+              >
+                {course.isPublished ? "Published" : "Draft"}
+              </span>
+            </div>
+          </CardHeader>
+
+          <CardContent className="space-y-4">
+            {/* DESCRIPTION */}
+
+            <div className="line-clamp-4 text-sm text-muted-foreground">
+              {course.description ? (
+                <RichTextPreview value={course.description} />
               ) : (
-                <div className="flex h-full items-center justify-center">
-                  <ImageIcon className="h-10 w-10 text-muted-foreground" />
-                </div>
+                <p className="italic">No description</p>
               )}
             </div>
 
-            <CardHeader>
-              <div className="flex items-start justify-between gap-2">
-                <CardTitle className="line-clamp-2 text-lg">
-                  {course.title}
-                </CardTitle>
+            {/* PRICING */}
 
-                <span
-                  className={`rounded-full px-2 py-1 text-xs font-medium ${
-                    course.isPublished
-                      ? "bg-green-100 text-green-700"
-                      : "bg-yellow-100 text-yellow-700"
-                  }`}
-                >
-                  {course.isPublished ? "Published" : "Draft"}
-                </span>
-              </div>
-            </CardHeader>
+            <div className="space-y-1 text-sm">
+              {course.originalPrice && (
+                <div className="text-muted-foreground line-through">
+                  {formatPrice(course.originalPrice)}
+                </div>
+              )}
 
-            <CardContent className="space-y-4">
-              {/* DESCRIPTION */}
+              {course.price && (
+                <div className="font-semibold">{formatPrice(course.price)}</div>
+              )}
+            </div>
 
-              <div className="line-clamp-4 text-sm text-muted-foreground">
-                {course.description ? (
-                  <RichTextPreview value={course.description} />
-                ) : (
-                  <p className="italic">No description</p>
-                )}
-              </div>
+            {/* ACTION */}
 
-              {/* PRICING */}
-
-              <div className="space-y-1 text-sm">
-                {course.originalPrice && (
-                  <div className="text-muted-foreground line-through">
-                    {formatPrice(course.originalPrice)}
-                  </div>
-                )}
-
-                {course.price && (
-                  <div className="font-semibold">
-                    {formatPrice(course.price)}
-                  </div>
-                )}
-              </div>
-
-              {/* ACTION */}
-
-              <Button asChild className="w-full">
-                <Link href={`/dashboard/courses/${course.id}`}>
-                  Manage Course
-                </Link>
-              </Button>
-            </CardContent>
-          </Card>
-        </>
+            <Button asChild className="w-full">
+              <Link href={`/dashboard/courses/${course.id}`}>
+                Manage Course
+              </Link>
+            </Button>
+          </CardContent>
+        </Card>
       ))}
     </div>
   );
