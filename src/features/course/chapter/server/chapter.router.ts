@@ -424,4 +424,134 @@ export const chapterRouter = createTRPCRouter({
         },
       });
     }),
+
+  publish: instructorProcedure
+    .input(
+      z.object({
+        chapterId: z.string(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const chapter = await ctx.prisma.chapter.findUnique({
+        where: {
+          id: input.chapterId,
+        },
+        include: {
+          course: {
+            select: {
+              authorId: true,
+            },
+          },
+        },
+      });
+
+      if (!chapter) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+        });
+      }
+
+      const isOwner = chapter.course.authorId === ctx.user.id;
+      const isAdmin = ctx.user.role === "ADMIN";
+
+      if (!isOwner && !isAdmin) {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+        });
+      }
+
+      return ctx.prisma.chapter.update({
+        where: {
+          id: input.chapterId,
+        },
+        data: {
+          isPublished: true,
+        },
+      });
+    }),
+  unpublish: instructorProcedure
+    .input(
+      z.object({
+        chapterId: z.string(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const chapter = await ctx.prisma.chapter.findUnique({
+        where: {
+          id: input.chapterId,
+        },
+        include: {
+          course: {
+            select: {
+              authorId: true,
+            },
+          },
+        },
+      });
+
+      if (!chapter) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+        });
+      }
+
+      const isOwner = chapter.course.authorId === ctx.user.id;
+      const isAdmin = ctx.user.role === "ADMIN";
+
+      if (!isOwner && !isAdmin) {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+        });
+      }
+
+      return ctx.prisma.chapter.update({
+        where: {
+          id: input.chapterId,
+        },
+        data: {
+          isPublished: false,
+        },
+      });
+    }),
+  delete: instructorProcedure
+    .input(
+      z.object({
+        chapterId: z.string(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const chapter = await ctx.prisma.chapter.findUnique({
+        where: {
+          id: input.chapterId,
+        },
+        include: {
+          course: {
+            select: {
+              authorId: true,
+            },
+          },
+        },
+      });
+
+      if (!chapter) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+        });
+      }
+
+      const isOwner = chapter.course.authorId === ctx.user.id;
+      const isAdmin = ctx.user.role === "ADMIN";
+
+      if (!isOwner && !isAdmin) {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+        });
+      }
+
+      return ctx.prisma.chapter.delete({
+        where: {
+          id: input.chapterId,
+        },
+      });
+    }),
 });

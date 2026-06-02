@@ -45,6 +45,7 @@ const data = {
           icon: Users2Icon,
         },
       ],
+      isActive: true,
     },
 
     {

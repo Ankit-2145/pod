@@ -26,6 +26,7 @@ import {
 } from "@/components/ui/sidebar";
 import { authClient } from "@/lib/auth/auth-client";
 import { LogOutButton } from "@/features/auth/components/log-out-button";
+import Link from "next/link";
 
 export function NavUser() {
   const { isMobile } = useSidebar();
@@ -89,9 +90,11 @@ export function NavUser() {
             <DropdownMenuSeparator />
 
             <DropdownMenuGroup>
-              <DropdownMenuItem>
-                <HomeIcon />
-                Home
+              <DropdownMenuItem asChild>
+                <Link href="/">
+                  <HomeIcon />
+                  <span>Home</span>
+                </Link>
               </DropdownMenuItem>
               <DropdownMenuItem>
                 <BadgeCheck />

@@ -1,6 +1,10 @@
 import z from "zod";
 import { TRPCError } from "@trpc/server";
-import { createTRPCRouter, instructorProcedure } from "@/trpc/init";
+import {
+  createTRPCRouter,
+  instructorProcedure,
+  protectedProcedure,
+} from "@/trpc/init";
 import { UTApi } from "uploadthing/server";
 
 export const courseRouter = createTRPCRouter({
@@ -485,4 +489,24 @@ export const courseRouter = createTRPCRouter({
         success: true,
       };
     }),
+  getPublished: protectedProcedure.query(async ({ ctx }) => {
+    return ctx.prisma.course.findMany({
+      where: {
+        isPublished: true,
+      },
+
+      include: {
+        category: true,
+        chapters: {
+          where: {
+            isPublished: true,
+          },
+        },
+      },
+
+      orderBy: {
+        createdAt: "desc",
+      },
+    });
+  }),
 });

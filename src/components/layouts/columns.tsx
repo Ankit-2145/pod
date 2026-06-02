@@ -12,7 +12,7 @@ import {
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
-import { Course } from "@/generated/prisma/client";
+import { Course } from "@/generated/prisma/browser";
 
 export const columns: ColumnDef<Course>[] = [
   {

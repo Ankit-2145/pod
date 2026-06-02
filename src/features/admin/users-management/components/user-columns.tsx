@@ -1,22 +1,17 @@
 // user-columns.tsx
 
-"use client";
-
 import { ColumnDef } from "@tanstack/react-table";
 
 import { ArrowUpDown } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 
-export type UserRow = {
-  id: string;
-  name: string | null;
-  email: string;
-  role: string;
-  createdAt: Date;
-};
+import { Badge } from "@/components/ui/badge";
 
-export const userColumns: ColumnDef<UserRow>[] = [
+import type { UserWithRole } from "better-auth/plugins/admin";
+import { UserActions } from "../../components/user-actions";
+
+export const userColumns = (selfId: string): ColumnDef<UserWithRole>[] => [
   {
     accessorKey: "name",
 
@@ -33,7 +28,6 @@ export const userColumns: ColumnDef<UserRow>[] = [
 
   {
     accessorKey: "email",
-
     header: "Email",
   },
 
@@ -41,6 +35,29 @@ export const userColumns: ColumnDef<UserRow>[] = [
     accessorKey: "role",
 
     header: "Role",
+
+    cell: ({ row }) => (
+      <Badge variant={row.original.role === "admin" ? "default" : "secondary"}>
+        {row.original.role}
+      </Badge>
+    ),
+  },
+  {
+    id: "status",
+
+    header: "Status",
+
+    cell: ({ row }) => (
+      <div className="flex flex-wrap gap-1">
+        {row.original.banned && <Badge variant="destructive">Banned</Badge>}
+
+        {row.original.emailVerified ? (
+          <Badge variant="outline">Verified</Badge>
+        ) : (
+          <Badge variant="secondary">Unverified</Badge>
+        )}
+      </div>
+    ),
   },
 
   {
@@ -56,12 +73,12 @@ export const userColumns: ColumnDef<UserRow>[] = [
       </Button>
     ),
 
-    cell: ({ row }) => {
-      return new Date(row.original.createdAt).toLocaleDateString();
-    },
+    cell: ({ row }) => new Date(row.original.createdAt).toLocaleDateString(),
   },
 
   {
-    accessorKey: "actions",
+    id: "actions",
+
+    cell: ({ row }) => <UserActions user={row.original} selfId={selfId} />,
   },
 ];

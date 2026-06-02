@@ -13,6 +13,7 @@ import { ChapterDescriptionForm } from "./chapter-description-form";
 import { ChapterAccessForm } from "./chapter-access-form";
 import { ChapterVideoForm } from "./chapter-video-form";
 import { ChapterAttachmentsForm } from "./chapter-attachment-form";
+import { ChapterActions } from "./chapter-actions";
 
 interface ChapterEditorProps {
   courseId: string;
@@ -29,13 +30,15 @@ export function ChapterEditor({ courseId, chapterId }: ChapterEditorProps) {
     }),
   );
 
-  const requiredFields = [chapter.title, chapter.description];
+  const requiredFields = [chapter.title, chapter.description, chapter.videoUrl];
 
   const totalFields = requiredFields.length;
 
   const completedFields = requiredFields.filter(Boolean).length;
 
   const completionText = `(${completedFields}/${totalFields})`;
+
+  const isComplete = requiredFields.every(Boolean);
 
   return (
     <>
@@ -59,12 +62,12 @@ export function ChapterEditor({ courseId, chapterId }: ChapterEditorProps) {
                 </span>
               </div>
 
-              {/* <ChapterActions
+              <ChapterActions
                 disabled={!isComplete}
                 courseId={courseId}
                 chapterId={chapterId}
                 isPublished={chapter.isPublished}
-              /> */}
+              />
             </div>
           </div>
         </div>
