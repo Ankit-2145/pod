@@ -1,3 +1,5 @@
+"use client";
+
 import { RichTextPreview } from "@/features/course/text-editor/rich-text-preview";
 import Image from "next/image";
 
