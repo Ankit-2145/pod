@@ -24,7 +24,6 @@ export function CoursesGrid() {
             title={course.title}
             imageUrl={course.imageUrl}
             chapterCount={course.chapters.length}
-            description={course.description}
           />
         </div>
       ))}

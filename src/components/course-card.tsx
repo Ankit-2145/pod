@@ -1,21 +1,14 @@
 "use client";
 
-import { RichTextPreview } from "@/features/course/text-editor/rich-text-preview";
 import Image from "next/image";
 
 interface CourseCardProps {
   title: string;
   imageUrl: string | null;
   chapterCount: number;
-  description: string | null;
 }
 
-export function CourseCard({
-  title,
-  imageUrl,
-  chapterCount,
-  description,
-}: CourseCardProps) {
+export function CourseCard({ title, imageUrl, chapterCount }: CourseCardProps) {
   return (
     <div className="overflow-hidden rounded-lg border">
       <div className="relative aspect-video">
@@ -33,11 +26,6 @@ export function CourseCard({
         <p className="mt-1 text-sm text-muted-foreground">
           {chapterCount} chapters
         </p>
-        {description && (
-          <p>
-            <RichTextPreview value={description} />
-          </p>
-        )}
       </div>
     </div>
   );
