@@ -6,7 +6,7 @@ import { HydrateClient, prefetch, trpc } from "@/trpc/server";
 export default async function DashboardPage() {
   const session = await requireAuth();
 
-  prefetch(trpc.course.getMany.queryOptions());
+  prefetch(trpc.course.getDashboardCourses.queryOptions());
 
   return (
     <HydrateClient>
@@ -21,14 +21,7 @@ export default async function DashboardPage() {
           </p>
         </div>
 
-        {session.user.role === "admin" ? (
-          <DashboardCourses />
-        ) : (
-          <p className="text-muted-foreground">
-            You do not have access to the dashboard. Please contact support if
-            you believe this is an error.
-          </p>
-        )}
+        <DashboardCourses />
       </section>
     </HydrateClient>
   );

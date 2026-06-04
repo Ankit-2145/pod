@@ -68,16 +68,57 @@ export const courseRouter = createTRPCRouter({
 
       return course;
     }),
-  getMany: instructorProcedure.query(async ({ ctx }) => {
-    const isAdmin = ctx.user.role === "admin";
+  getDashboardCourses: protectedProcedure.query(async ({ ctx }) => {
+    const userId = ctx.user.id;
+    const role = ctx.user.role;
 
+    // Admin sees everything
+    if (role === "admin") {
+      return ctx.prisma.course.findMany({
+        include: {
+          chapters: true,
+        },
+        orderBy: {
+          createdAt: "desc",
+        },
+      });
+    }
+
+    // Instructor sees only their own courses
+    if (role === "instructor") {
+      return ctx.prisma.course.findMany({
+        where: {
+          authorId: userId,
+        },
+        include: {
+          chapters: true,
+        },
+        orderBy: {
+          createdAt: "desc",
+        },
+      });
+    }
+
+    // Student/User sees enrolled courses only
     return ctx.prisma.course.findMany({
-      where: isAdmin
-        ? {}
-        : {
-            authorId: ctx.user.id,
+      where: {
+        purchases: {
+          some: {
+            userId,
           },
-
+        },
+        isPublished: true,
+      },
+      include: {
+        chapters: {
+          where: {
+            isPublished: true,
+          },
+          orderBy: {
+            position: "asc",
+          },
+        },
+      },
       orderBy: {
         createdAt: "desc",
       },

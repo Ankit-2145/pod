@@ -35,24 +35,38 @@ import type { UserWithRole } from "better-auth/plugins/admin";
 interface UserActionsProps {
   user: UserWithRole;
   selfId: string;
+  currentUserRole: string;
 }
 
-export function UserActions({ user, selfId }: UserActionsProps) {
+export function UserActions({
+  user,
+  selfId,
+  currentUserRole,
+}: UserActionsProps) {
   const router = useRouter();
 
   const { refetch } = authClient.useSession();
 
   const isSelf = user.id === selfId;
 
+  const isCurrentUserSuperAdmin = currentUserRole === "superAdmin";
+
+  const isTargetSuperAdmin = user.role === "superAdmin";
+
   if (isSelf) {
     return null;
   }
 
-  function onAdmin(userId: string) {
+  // Nobody can manage a super admin
+  if (isTargetSuperAdmin) {
+    return null;
+  }
+
+  function onRoleChange(userId: string, role: "user" | "instructor" | "admin") {
     authClient.admin.setRole(
       {
         userId,
-        role: user.role === "admin" ? "user" : "admin",
+        role,
       },
       {
         onSuccess: () => {
@@ -150,9 +164,25 @@ export function UserActions({ user, selfId }: UserActionsProps) {
         </DropdownMenuTrigger>
 
         <DropdownMenuContent align="end">
-          <DropdownMenuItem onClick={() => onAdmin(user.id)}>
-            {user.role === "admin" ? "Remove Admin" : "Make Admin"}
-          </DropdownMenuItem>
+          {isCurrentUserSuperAdmin && (
+            <>
+              <DropdownMenuItem onClick={() => onRoleChange(user.id, "user")}>
+                Make User
+              </DropdownMenuItem>
+
+              <DropdownMenuItem
+                onClick={() => onRoleChange(user.id, "instructor")}
+              >
+                Make Instructor
+              </DropdownMenuItem>
+
+              <DropdownMenuItem onClick={() => onRoleChange(user.id, "admin")}>
+                Make Admin
+              </DropdownMenuItem>
+
+              <DropdownMenuSeparator />
+            </>
+          )}
 
           <DropdownMenuItem onClick={() => onImpersonate(user.id)}>
             Impersonate

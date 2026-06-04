@@ -43,7 +43,7 @@ export const instructorProcedure = protectedProcedure.use(
   async ({ ctx, next }) => {
     const role = ctx.user.role;
 
-    if (role !== "INSTRUCTOR" && role !== "admin") {
+    if (role !== "instructor" && role !== "admin" && role !== "superAdmin") {
       throw new TRPCError({
         code: "FORBIDDEN",
       });
@@ -56,7 +56,7 @@ export const instructorProcedure = protectedProcedure.use(
 export const adminProcedure = protectedProcedure.use(async ({ ctx, next }) => {
   const role = ctx.user.role;
 
-  if (role !== "admin") {
+  if (role !== "admin" && role !== "superAdmin") {
     throw new TRPCError({
       code: "FORBIDDEN",
     });

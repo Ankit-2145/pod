@@ -4,7 +4,13 @@ import {
   adminClient,
   organizationClient,
 } from "better-auth/client/plugins";
-import { ac, admin, user } from "@/lib/auth/permissions";
+import {
+  ac,
+  admin,
+  instructor,
+  superAdmin,
+  user,
+} from "@/lib/auth/permissions";
 
 export const authClient = createAuthClient({
   plugins: [
@@ -16,8 +22,10 @@ export const authClient = createAuthClient({
     adminClient({
       ac,
       roles: {
-        admin,
         user,
+        instructor,
+        admin,
+        superAdmin,
       },
     }),
     organizationClient(),

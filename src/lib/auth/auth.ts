@@ -7,7 +7,13 @@ import {
   organization,
   twoFactor,
 } from "better-auth/plugins";
-import { ac, admin, user } from "@/lib/auth/permissions";
+import {
+  ac,
+  admin,
+  instructor,
+  superAdmin,
+  user,
+} from "@/lib/auth/permissions";
 
 import { sendExistingUserEmail } from "../emails/send-existing-user-email";
 import { sendPasswordResetEmail } from "../emails/send-password-reset-email";
@@ -76,8 +82,10 @@ export const auth = betterAuth({
     adminPlugin({
       ac,
       roles: {
-        admin,
         user,
+        instructor,
+        admin,
+        superAdmin,
       },
     }),
     organization({

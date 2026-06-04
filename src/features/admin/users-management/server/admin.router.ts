@@ -8,7 +8,7 @@ export const adminRouter = createTRPCRouter({
     return auth.api.listUsers({
       headers: await headers(),
       query: {
-        limit: 100,
+        limit: 20,
         sortBy: "createdAt",
         sortDirection: "asc",
       },

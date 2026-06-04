@@ -20,7 +20,7 @@ export function UsersTable() {
   return (
     <div className="p-6">
       <DataTable
-        columns={userColumns(session?.user.id ?? "")}
+        columns={userColumns(session?.user.id ?? "", session?.user.role ?? "")}
         data={data.users}
         searchColumn="name"
         searchPlaceholder="Filter users..."

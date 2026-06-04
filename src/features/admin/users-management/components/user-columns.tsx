@@ -1,5 +1,3 @@
-// user-columns.tsx
-
 import { ColumnDef } from "@tanstack/react-table";
 
 import { ArrowUpDown } from "lucide-react";
@@ -11,7 +9,17 @@ import { Badge } from "@/components/ui/badge";
 import type { UserWithRole } from "better-auth/plugins/admin";
 import { UserActions } from "../../components/user-actions";
 
-export const userColumns = (selfId: string): ColumnDef<UserWithRole>[] => [
+const ROLE_LABELS = {
+  user: "User",
+  instructor: "Instructor",
+  admin: "Admin",
+  superAdmin: "Super Admin",
+};
+
+export const userColumns = (
+  selfId: string,
+  currentUserRole: string,
+): ColumnDef<UserWithRole>[] => [
   {
     accessorKey: "name",
 
@@ -37,8 +45,8 @@ export const userColumns = (selfId: string): ColumnDef<UserWithRole>[] => [
     header: "Role",
 
     cell: ({ row }) => (
-      <Badge variant={row.original.role === "admin" ? "default" : "secondary"}>
-        {row.original.role}
+      <Badge>
+        {ROLE_LABELS[row.original.role as keyof typeof ROLE_LABELS]}
       </Badge>
     ),
   },
@@ -79,6 +87,12 @@ export const userColumns = (selfId: string): ColumnDef<UserWithRole>[] => [
   {
     id: "actions",
 
-    cell: ({ row }) => <UserActions user={row.original} selfId={selfId} />,
+    cell: ({ row }) => (
+      <UserActions
+        user={row.original}
+        selfId={selfId}
+        currentUserRole={currentUserRole}
+      />
+    ),
   },
 ];

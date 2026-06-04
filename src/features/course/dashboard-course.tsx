@@ -20,7 +20,7 @@ export function DashboardCourses() {
   const trpc = useTRPC();
 
   const { data: courses } = useSuspenseQuery(
-    trpc.course.getMany.queryOptions(),
+    trpc.course.getDashboardCourses.queryOptions(),
   );
 
   if (courses.length === 0) {
