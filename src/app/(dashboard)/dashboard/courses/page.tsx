@@ -13,7 +13,7 @@ export default async function CoursePage() {
     redirect("/dashboard");
   }
 
-  prefetch(trpc.course.getMany.queryOptions());
+  prefetch(trpc.course.getDashboardCourses.queryOptions());
 
   return (
     <HydrateClient>
