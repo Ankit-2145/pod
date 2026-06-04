@@ -36,7 +36,9 @@ export function Actions({ disabled, courseId, isPublished }: ActionsProps) {
           }),
         );
 
-        await queryClient.invalidateQueries(trpc.course.getMany.queryFilter());
+        await queryClient.invalidateQueries(
+          trpc.course.getDashboardCourses.queryFilter(),
+        );
       },
 
       onError: (error) => {
@@ -56,7 +58,9 @@ export function Actions({ disabled, courseId, isPublished }: ActionsProps) {
           }),
         );
 
-        await queryClient.invalidateQueries(trpc.course.getMany.queryFilter());
+        await queryClient.invalidateQueries(
+          trpc.course.getDashboardCourses.queryFilter(),
+        );
       },
 
       onError: (error) => {
@@ -70,7 +74,9 @@ export function Actions({ disabled, courseId, isPublished }: ActionsProps) {
       onSuccess: async () => {
         toast.success("Course deleted");
 
-        await queryClient.invalidateQueries(trpc.course.getMany.queryFilter());
+        await queryClient.invalidateQueries(
+          trpc.course.getDashboardCourses.queryFilter(),
+        );
 
         router.push("/dashboard/courses");
       },
