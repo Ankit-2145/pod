@@ -73,7 +73,7 @@ export const courseRouter = createTRPCRouter({
     const role = ctx.user.role;
 
     // Admin sees everything
-    if (role === "admin") {
+    if (role === "admin" || role === "superAdmin") {
       return ctx.prisma.course.findMany({
         include: {
           chapters: true,
@@ -149,9 +149,11 @@ export const courseRouter = createTRPCRouter({
 
       const isInstructor = course.authorId === ctx.user.id;
 
-      const isAdmin = ctx.user.role === "ADMIN";
+      const isAdmin = ctx.user.role === "Admin";
 
-      if (!isInstructor && !isAdmin) {
+      const isSuperAdmin = ctx.user.role === "superAdmin";
+
+      if (!isInstructor && !isAdmin && !isSuperAdmin) {
         throw new TRPCError({
           code: "FORBIDDEN",
         });
