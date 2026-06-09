@@ -6,6 +6,7 @@ import { TRPCReactProvider } from "@/trpc/client";
 import { Toaster } from "@/components/ui/sonner";
 import { ThemeProvider } from "@/components/providers/theme-provider";
 import { ImpersonationIndicator } from "@/features/admin/components/impersonation-indicator";
+import Script from "next/script";
 
 const fontSans = Inter({
   subsets: ["latin"],
@@ -44,7 +45,12 @@ export default function RootLayout({
             disableTransitionOnChange
           >
             {children}
+            <Script
+              src="https://checkout.razorpay.com/v1/checkout.js"
+              strategy="lazyOnload"
+            />
             <Toaster />
+
             <ImpersonationIndicator />
           </ThemeProvider>
         </TRPCReactProvider>

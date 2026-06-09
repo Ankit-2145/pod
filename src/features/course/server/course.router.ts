@@ -6,6 +6,8 @@ import {
   protectedProcedure,
 } from "@/trpc/init";
 import { UTApi } from "uploadthing/server";
+import { razorpay } from "@/lib/razorpay";
+import crypto from "crypto";
 
 export const courseRouter = createTRPCRouter({
   create: instructorProcedure
@@ -59,8 +61,9 @@ export const courseRouter = createTRPCRouter({
       const isOwner = course.authorId === ctx.user.id;
 
       const isAdmin = ctx.user.role === "admin";
+      const isSuperAdmin = ctx.user.role === "superAdmin";
 
-      if (!isOwner && !isAdmin) {
+      if (!isOwner && !isAdmin && !isSuperAdmin) {
         throw new TRPCError({
           code: "FORBIDDEN",
         });
@@ -425,9 +428,10 @@ export const courseRouter = createTRPCRouter({
 
       const isOwner = course.authorId === ctx.user.id;
 
-      const isAdmin = ctx.user.role === "ADMIN";
+      const isAdmin = ctx.user.role === "admin";
+      const isSuperAdmin = ctx.user.role === "superAdmin";
 
-      if (!isOwner && !isAdmin) {
+      if (!isOwner && !isAdmin && !isSuperAdmin) {
         throw new TRPCError({
           code: "FORBIDDEN",
           message: "Unauthorized",
@@ -533,11 +537,12 @@ export const courseRouter = createTRPCRouter({
       };
     }),
   getPublished: protectedProcedure.query(async ({ ctx }) => {
-    return ctx.prisma.course.findMany({
+    const user = ctx.user;
+
+    const courses = await ctx.prisma.course.findMany({
       where: {
         isPublished: true,
       },
-
       include: {
         category: true,
         chapters: {
@@ -545,11 +550,148 @@ export const courseRouter = createTRPCRouter({
             isPublished: true,
           },
         },
+        purchases: {
+          where: {
+            userId: user.id,
+          },
+          select: {
+            id: true,
+          },
+        },
       },
-
       orderBy: {
         createdAt: "desc",
       },
     });
+
+    return courses.map(({ purchases, ...course }) => ({
+      ...course,
+
+      canManage:
+        user.role === "admin" ||
+        user.role === "superAdmin" ||
+        course.authorId === user.id,
+
+      isPurchased: purchases.length > 0,
+    }));
   }),
+
+  createCheckout: protectedProcedure
+    .input(
+      z.object({
+        courseId: z.string(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const user = ctx.user;
+
+      const course = await ctx.prisma.course.findUnique({
+        where: {
+          id: input.courseId,
+          isPublished: true,
+        },
+      });
+
+      if (!course) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Course not found",
+        });
+      }
+
+      const purchase = await ctx.prisma.purchase.findUnique({
+        where: {
+          userId_courseId: {
+            userId: user.id,
+            courseId: input.courseId,
+          },
+        },
+      });
+
+      if (purchase) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Already purchased",
+        });
+      }
+
+      const order = await razorpay.orders.create({
+        amount: Math.round(course.price! * 100),
+        currency: "INR",
+        receipt: `receipt_${Date.now()}`,
+        notes: {
+          courseId: course.id,
+          userId: user.id,
+        },
+      });
+
+      return {
+        orderId: order.id,
+        amount: order.amount,
+        currency: order.currency,
+        course: {
+          id: course.id,
+          title: course.title,
+        },
+        user: {
+          name: user.name ?? "Student",
+          email: user.email!,
+        },
+      };
+    }),
+
+  verifyPayment: protectedProcedure
+    .input(
+      z.object({
+        courseId: z.string(),
+        razorpay_order_id: z.string(),
+        razorpay_payment_id: z.string(),
+        razorpay_signature: z.string(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const userId = ctx.user.id;
+
+      const generatedSignature = crypto
+        .createHmac("sha256", process.env.RAZORPAY_KEY_SECRET!)
+        .update(`${input.razorpay_order_id}|${input.razorpay_payment_id}`)
+        .digest("hex");
+
+      const isValid = generatedSignature === input.razorpay_signature;
+
+      if (!isValid) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Invalid payment signature",
+        });
+      }
+
+      const existingPurchase = await ctx.prisma.purchase.findUnique({
+        where: {
+          userId_courseId: {
+            userId,
+            courseId: input.courseId,
+          },
+        },
+      });
+
+      if (existingPurchase) {
+        return {
+          success: true,
+        };
+      }
+
+      await ctx.prisma.purchase.create({
+        data: {
+          userId,
+          courseId: input.courseId,
+          // razorpayOrderId: input.razorpay_order_id,
+          // razorpayPaymentId: input.razorpay_payment_id,
+        },
+      });
+
+      return {
+        success: true,
+      };
+    }),
 });

@@ -14,12 +14,16 @@ export function isAdmin(role?: string | null) {
   return role === "admin";
 }
 
+export function isSuperAdmin(role?: string | null) {
+  return role === "superAdmin";
+}
+
 export function isInstructor(role?: string | null) {
   return role === "INSTRUCTOR";
 }
 
 export function canManageCourses(role?: string | null) {
-  return isAdmin(role) || isInstructor(role);
+  return isAdmin(role) || isInstructor(role) || isSuperAdmin(role);
 }
 
 export function canManageCourse(user: User, course: Course) {
@@ -27,7 +31,9 @@ export function canManageCourse(user: User, course: Course) {
 
   const isAdmin = user.role === "admin";
 
-  return isOwner || isAdmin;
+  const isSuperAdmin = user.role === "superAdmin";
+
+  return isOwner || isAdmin || isSuperAdmin;
 }
 
 export function requireCourseAccess(user: User, course: Course) {
