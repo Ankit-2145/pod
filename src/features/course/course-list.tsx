@@ -12,7 +12,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 
 import { formatPrice } from "@/lib/course/format";
-// import { RichTextPreview } from "./text-editor/rich-text-preview";
+import { RichTextPreview } from "./text-editor/rich-text-preview";
 import { CourseEnrollButton } from "./enroll-button";
 
 export function CoursesList() {
@@ -64,13 +64,13 @@ export function CoursesList() {
               </p>
             )}
 
-            {/* <div className="line-clamp-4 text-sm text-muted-foreground">
+            <div className="line-clamp-4 text-sm text-muted-foreground">
               {course.description ? (
                 <RichTextPreview value={course.description} />
               ) : (
                 <p className="italic">No description</p>
               )}
-            </div> */}
+            </div>
 
             <div className="flex items-center justify-between text-sm">
               <span>{course.chapters.length} chapters</span>
