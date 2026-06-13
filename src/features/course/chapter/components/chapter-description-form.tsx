@@ -50,7 +50,6 @@ type ChapterDescriptionFormValues = z.infer<
 
 export function ChapterDescriptionForm({
   initialData,
-  courseId,
   chapterId,
 }: ChapterDescriptionFormProps) {
   const [isEditing, setIsEditing] = useState(false);
@@ -78,7 +77,6 @@ export function ChapterDescriptionForm({
 
         await queryClient.invalidateQueries(
           trpc.chapter.getById.queryFilter({
-            courseId,
             chapterId,
           }),
         );

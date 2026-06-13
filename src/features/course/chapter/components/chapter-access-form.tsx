@@ -47,7 +47,6 @@ type ChapterAccessFormValues = z.infer<typeof chapterAccessFormSchema>;
 
 export function ChapterAccessForm({
   initialData,
-  courseId,
   chapterId,
 }: ChapterAccessFormProps) {
   const [isEditing, setIsEditing] = useState(false);
@@ -73,7 +72,6 @@ export function ChapterAccessForm({
 
         await queryClient.invalidateQueries(
           trpc.chapter.getById.queryFilter({
-            courseId,
             chapterId,
           }),
         );

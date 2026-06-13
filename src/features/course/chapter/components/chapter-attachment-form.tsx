@@ -27,7 +27,7 @@ interface ChapterAttachmentsFormProps {
 
 export function ChapterAttachmentsForm({
   initialData,
-  courseId,
+
   chapterId,
 }: ChapterAttachmentsFormProps) {
   const [isEditing, setIsEditing] = useState(false);
@@ -47,7 +47,6 @@ export function ChapterAttachmentsForm({
 
         await queryClient.invalidateQueries(
           trpc.chapter.getById.queryFilter({
-            courseId,
             chapterId,
           }),
         );
@@ -68,7 +67,6 @@ export function ChapterAttachmentsForm({
 
         await queryClient.invalidateQueries(
           trpc.chapter.getById.queryFilter({
-            courseId,
             chapterId,
           }),
         );

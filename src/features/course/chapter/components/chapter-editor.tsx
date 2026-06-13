@@ -25,7 +25,6 @@ export function ChapterEditor({ courseId, chapterId }: ChapterEditorProps) {
 
   const { data: chapter } = useSuspenseQuery(
     trpc.chapter.getById.queryOptions({
-      courseId,
       chapterId,
     }),
   );

@@ -92,8 +92,11 @@ export function DashboardCourses() {
               )}
             </div>
 
-            {/* PRICING */}
+            <div className="space-y-1 text-sm">
+              <div className="text-muted-foreground">{course.authorId}</div>
+            </div>
 
+            {/* PRICING */}
             <div className="space-y-1 text-sm">
               {course.originalPrice && (
                 <div className="text-muted-foreground line-through">

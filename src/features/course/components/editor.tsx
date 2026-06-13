@@ -30,7 +30,14 @@ export function Editor({ courseId }: EditorProps) {
     }),
   );
 
-  const requiredFields = [course.title, course.shortDescription];
+  const requiredFields = [
+    course.title,
+    course.shortDescription,
+    course.description,
+    course.imageUrl,
+    course.categoryId,
+    course.price,
+  ];
 
   const totalFields = requiredFields.length;
 
@@ -43,7 +50,7 @@ export function Editor({ courseId }: EditorProps) {
     <main className="flex-1">
       <div className="space-y-6 p-6">
         <div>
-          <h1 className="text-3xl font-bold">Course setup</h1>
+          <h1 className="text-xl font-semibold">Course setup</h1>
 
           <p className="mt-2 text-sm text-muted-foreground">
             Complete all fields {completionText}
@@ -54,7 +61,7 @@ export function Editor({ courseId }: EditorProps) {
           courseId={courseId}
           isPublished={course.isPublished}
         />
-        <div className="grid gap-6 grid-cols-2">
+        <div className="grid gap-6 grid-cols-1">
           <Card className="gap-0">
             <CardHeader>
               <div className="flex items-center gap-2">
@@ -149,7 +156,7 @@ export function Editor({ courseId }: EditorProps) {
             </CardHeader>
 
             <CardContent className="space-y-6">
-              <ChaptersForm initialData={course} courseId={courseId} />
+              <ChaptersForm chapters={course.chapters} courseId={courseId} />
             </CardContent>
           </Card>
         </div>

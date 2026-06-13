@@ -1,27 +1,22 @@
 import z from "zod";
-
-import { createTRPCRouter, instructorProcedure } from "@/trpc/init";
-
 import { TRPCError } from "@trpc/server";
 
-const categorySchema = z.object({
-  name: z.string().min(1, {
-    message: "Category name is required",
-  }),
-});
+import {
+  createTRPCRouter,
+  adminProcedure,
+  instructorProcedure,
+} from "@/trpc/init";
 
 export const categoryRouter = createTRPCRouter({
-  create: instructorProcedure
-    .input(categorySchema)
+  create: adminProcedure
+    .input(
+      z.object({
+        name: z.string().min(1, {
+          message: "Category name is required",
+        }),
+      }),
+    )
     .mutation(async ({ ctx, input }) => {
-      const isAdmin = ctx.user.role === "admin";
-
-      if (!isAdmin) {
-        throw new TRPCError({
-          code: "FORBIDDEN",
-        });
-      }
-
       const slug = input.name.toLowerCase().trim().replace(/\s+/g, "-");
 
       const existingCategory = await ctx.prisma.category.findFirst({
@@ -34,6 +29,9 @@ export const categoryRouter = createTRPCRouter({
               slug,
             },
           ],
+        },
+        select: {
+          id: true,
         },
       });
 
@@ -52,6 +50,77 @@ export const categoryRouter = createTRPCRouter({
       });
     }),
 
+  getBySlug: adminProcedure
+    .input(
+      z.object({
+        slug: z.string(),
+      }),
+    )
+    .query(async ({ ctx, input }) => {
+      const category = await ctx.prisma.category.findUnique({
+        where: {
+          slug: input.slug,
+        },
+
+        select: {
+          id: true,
+          name: true,
+          slug: true,
+          isActive: true,
+
+          _count: {
+            select: {
+              courses: true,
+            },
+          },
+        },
+      });
+
+      if (!category) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+        });
+      }
+
+      return category;
+    }),
+
+  getById: adminProcedure
+    .input(
+      z.object({
+        categoryId: z.string(),
+      }),
+    )
+    .query(async ({ ctx, input }) => {
+      const category = await ctx.prisma.category.findUnique({
+        where: {
+          id: input.categoryId,
+        },
+
+        select: {
+          id: true,
+          name: true,
+          slug: true,
+          isActive: true,
+
+          _count: {
+            select: {
+              courses: true,
+            },
+          },
+        },
+      });
+
+      if (!category) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Category not found",
+        });
+      }
+
+      return category;
+    }),
+
   getMany: instructorProcedure.query(async ({ ctx }) => {
     return ctx.prisma.category.findMany({
       where: {
@@ -62,7 +131,11 @@ export const categoryRouter = createTRPCRouter({
         name: "asc",
       },
 
-      include: {
+      select: {
+        id: true,
+        name: true,
+        slug: true,
+        isActive: true,
         _count: {
           select: {
             courses: true,
@@ -72,24 +145,46 @@ export const categoryRouter = createTRPCRouter({
     });
   }),
 
-  update: instructorProcedure
+  update: adminProcedure
     .input(
       z.object({
         categoryId: z.string(),
 
-        name: z.string().min(1),
+        name: z.string().min(1, {
+          message: "Category name is required",
+        }),
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      const isAdmin = ctx.user.role === "ADMIN";
+      const slug = input.name.toLowerCase().trim().replace(/\s+/g, "-");
 
-      if (!isAdmin) {
+      const existingCategory = await ctx.prisma.category.findFirst({
+        where: {
+          id: {
+            not: input.categoryId,
+          },
+
+          OR: [
+            {
+              name: input.name,
+            },
+            {
+              slug,
+            },
+          ],
+        },
+
+        select: {
+          id: true,
+        },
+      });
+
+      if (existingCategory) {
         throw new TRPCError({
-          code: "FORBIDDEN",
+          code: "CONFLICT",
+          message: "Category already exists",
         });
       }
-
-      const slug = input.name.toLowerCase().trim().replace(/\s+/g, "-");
 
       return ctx.prisma.category.update({
         where: {
@@ -103,21 +198,13 @@ export const categoryRouter = createTRPCRouter({
       });
     }),
 
-  archive: instructorProcedure
+  archive: adminProcedure
     .input(
       z.object({
         categoryId: z.string(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      const isAdmin = ctx.user.role === "ADMIN";
-
-      if (!isAdmin) {
-        throw new TRPCError({
-          code: "FORBIDDEN",
-        });
-      }
-
       return ctx.prisma.category.update({
         where: {
           id: input.categoryId,
@@ -125,6 +212,48 @@ export const categoryRouter = createTRPCRouter({
 
         data: {
           isActive: false,
+        },
+      });
+    }),
+
+  delete: adminProcedure
+    .input(
+      z.object({
+        categoryId: z.string(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const category = await ctx.prisma.category.findUnique({
+        where: {
+          id: input.categoryId,
+        },
+        select: {
+          id: true,
+          _count: {
+            select: {
+              courses: true,
+            },
+          },
+        },
+      });
+
+      if (!category) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Category not found",
+        });
+      }
+
+      if (category._count.courses > 0) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Cannot delete a category that is assigned to courses",
+        });
+      }
+
+      await ctx.prisma.category.delete({
+        where: {
+          id: input.categoryId,
         },
       });
     }),

@@ -13,7 +13,7 @@ export function CoursesView() {
   const trpc = useTRPC();
 
   const { data: courses } = useSuspenseQuery(
-    trpc.course.getDashboardCourses.queryOptions(),
+    trpc.course.getInstructorCourses.queryOptions(),
   );
 
   return (

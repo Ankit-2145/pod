@@ -11,6 +11,13 @@ import { useTRPC } from "@/trpc/client";
 import { Button } from "@/components/ui/button";
 import { ConfirmModal } from "../../components/confirm-modal";
 
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+
 interface ChapterActionsProps {
   disabled: boolean;
   courseId: string;
@@ -35,18 +42,19 @@ export function ChapterActions({
       onSuccess: async () => {
         toast.success("Chapter published");
 
-        await queryClient.invalidateQueries(
-          trpc.chapter.getById.queryFilter({
-            courseId,
-            chapterId,
-          }),
-        );
+        await Promise.all([
+          queryClient.invalidateQueries(
+            trpc.chapter.getById.queryFilter({
+              chapterId,
+            }),
+          ),
 
-        await queryClient.invalidateQueries(
-          trpc.course.getById.queryFilter({
-            courseId,
-          }),
-        );
+          queryClient.invalidateQueries(
+            trpc.course.getById.queryFilter({
+              courseId,
+            }),
+          ),
+        ]);
       },
 
       onError: (error) => {
@@ -60,18 +68,19 @@ export function ChapterActions({
       onSuccess: async () => {
         toast.success("Chapter unpublished");
 
-        await queryClient.invalidateQueries(
-          trpc.chapter.getById.queryFilter({
-            courseId,
-            chapterId,
-          }),
-        );
+        await Promise.all([
+          queryClient.invalidateQueries(
+            trpc.chapter.getById.queryFilter({
+              chapterId,
+            }),
+          ),
 
-        await queryClient.invalidateQueries(
-          trpc.course.getById.queryFilter({
-            courseId,
-          }),
-        );
+          queryClient.invalidateQueries(
+            trpc.course.getById.queryFilter({
+              courseId,
+            }),
+          ),
+        ]);
       },
 
       onError: (error) => {
@@ -137,14 +146,28 @@ export function ChapterActions({
       </Button>
 
       <ConfirmModal onConfirm={onDelete}>
-        <Button
-          size="sm"
-          variant="destructive"
-          disabled={isPending}
-          className="rounded-full border-destructive bg-transparent text-destructive hover:bg-destructive hover:text-white"
-        >
-          Delete
-        </Button>
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <span>
+                <Button
+                  size="sm"
+                  variant="destructive"
+                  disabled={isPending || isPublished}
+                  className="rounded-full border-destructive bg-transparent text-destructive hover:bg-destructive hover:text-white"
+                >
+                  Delete
+                </Button>
+              </span>
+            </TooltipTrigger>
+
+            {isPublished && (
+              <TooltipContent>
+                <p>Unpublish the chapter before deleting it</p>
+              </TooltipContent>
+            )}
+          </Tooltip>
+        </TooltipProvider>
       </ConfirmModal>
     </div>
   );

@@ -53,7 +53,6 @@ type ChapterVideoFormValues = z.infer<typeof chapterVideoFormSchema>;
 
 export function ChapterVideoForm({
   initialData,
-  courseId,
   chapterId,
 }: ChapterVideoFormProps) {
   const [isEditing, setIsEditing] = useState(false);
@@ -81,7 +80,6 @@ export function ChapterVideoForm({
 
         await queryClient.invalidateQueries(
           trpc.chapter.getById.queryFilter({
-            courseId,
             chapterId,
           }),
         );

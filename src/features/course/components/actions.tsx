@@ -30,15 +30,17 @@ export function Actions({ disabled, courseId, isPublished }: ActionsProps) {
       onSuccess: async () => {
         toast.success("Course published");
 
-        await queryClient.invalidateQueries(
-          trpc.course.getById.queryFilter({
-            courseId,
-          }),
-        );
+        await Promise.all([
+          queryClient.invalidateQueries(
+            trpc.course.getById.queryFilter({
+              courseId,
+            }),
+          ),
 
-        await queryClient.invalidateQueries(
-          trpc.course.getDashboardCourses.queryFilter(),
-        );
+          queryClient.invalidateQueries(
+            trpc.course.getDashboardCourses.queryFilter(),
+          ),
+        ]);
       },
 
       onError: (error) => {
@@ -52,15 +54,17 @@ export function Actions({ disabled, courseId, isPublished }: ActionsProps) {
       onSuccess: async () => {
         toast.success("Course unpublished");
 
-        await queryClient.invalidateQueries(
-          trpc.course.getById.queryFilter({
-            courseId,
-          }),
-        );
+        await Promise.all([
+          queryClient.invalidateQueries(
+            trpc.course.getById.queryFilter({
+              courseId,
+            }),
+          ),
 
-        await queryClient.invalidateQueries(
-          trpc.course.getDashboardCourses.queryFilter(),
-        );
+          queryClient.invalidateQueries(
+            trpc.course.getDashboardCourses.queryFilter(),
+          ),
+        ]);
       },
 
       onError: (error) => {
@@ -71,12 +75,8 @@ export function Actions({ disabled, courseId, isPublished }: ActionsProps) {
 
   const deleteCourse = useMutation(
     trpc.course.delete.mutationOptions({
-      onSuccess: async () => {
+      onSuccess: () => {
         toast.success("Course deleted");
-
-        await queryClient.invalidateQueries(
-          trpc.course.getDashboardCourses.queryFilter(),
-        );
 
         router.push("/dashboard/courses");
       },
@@ -128,7 +128,7 @@ export function Actions({ disabled, courseId, isPublished }: ActionsProps) {
           size="sm"
           variant="destructive"
           className="rounded-full border-destructive bg-transparent text-destructive hover:bg-destructive hover:text-white"
-          disabled={isPending}
+          disabled={isPending || isPublished}
         >
           Delete
         </Button>

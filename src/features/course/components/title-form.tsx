@@ -89,10 +89,14 @@ export const TitleForm = ({ initialData, courseId }: TitleFormProps) => {
     updateTitle.isPending;
 
   return (
-    <div className="mt-6 rounded-md border border-blue-100 p-2">
-      <div className="flex items-center justify-between font-medium">
-        Course title
-        <Button onClick={toggleEdit} variant="ghost">
+    <div className="mt-4 rounded-xl border border-slate-200 p-4 shadow-sm transition-all hover:shadow-md">
+      <div className="flex items-center justify-between gap-4">
+        <h3 className="font-semibold text-slate-900">Course title</h3>
+        <Button
+          onClick={toggleEdit}
+          variant="ghost"
+          className="text-slate-600 hover:text-slate-900"
+        >
           {isEditing ? (
             <>Cancel</>
           ) : (
@@ -105,14 +109,14 @@ export const TitleForm = ({ initialData, courseId }: TitleFormProps) => {
       </div>
 
       {!isEditing && (
-        <p className="mt-2 text-sm text-gray-600">{initialData.title}</p>
+        <p className="mt-4 text-base text-slate-700">{initialData.title}</p>
       )}
 
       {isEditing && (
         <form
           id="course-title-form"
           onSubmit={form.handleSubmit(onUpdateTitle)}
-          className="mt-4 space-y-4"
+          className="mt-6 space-y-5"
         >
           <FieldGroup>
             <Controller
@@ -120,14 +124,20 @@ export const TitleForm = ({ initialData, courseId }: TitleFormProps) => {
               control={form.control}
               render={({ field, fieldState }) => (
                 <Field data-invalid={fieldState.invalid}>
-                  <FieldLabel htmlFor={field.name}>Title</FieldLabel>
+                  <FieldLabel
+                    htmlFor={field.name}
+                    className="font-medium text-slate-700"
+                  >
+                    Title
+                  </FieldLabel>
 
                   <Input
                     {...field}
                     id="title"
                     aria-invalid={fieldState.invalid}
-                    placeholder="Course Title"
+                    placeholder="Enter course title"
                     type="text"
+                    className="mt-2"
                   />
 
                   {fieldState.invalid && (
@@ -137,11 +147,19 @@ export const TitleForm = ({ initialData, courseId }: TitleFormProps) => {
               )}
             />
 
-            <Field>
-              <Button type="submit" className="w-full" disabled={isPending}>
-                Save
+            <div className="flex gap-3 pt-2">
+              <Button type="submit" className="flex-1" disabled={isPending}>
+                Save changes
               </Button>
-            </Field>
+              <Button
+                type="button"
+                variant="outline"
+                className="flex-1"
+                onClick={toggleEdit}
+              >
+                Cancel
+              </Button>
+            </div>
           </FieldGroup>
         </form>
       )}

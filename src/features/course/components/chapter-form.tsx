@@ -1,48 +1,32 @@
 "use client";
 
 import * as z from "zod";
-
 import { useState } from "react";
-
 import { Loader2, Plus } from "lucide-react";
-
 import { toast } from "sonner";
-
 import { Controller, useForm } from "react-hook-form";
-
 import { zodResolver } from "@hookform/resolvers/zod";
-
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-
 import { cn } from "@/lib/utils";
-
 import { useTRPC } from "@/trpc/client";
-
 import { Button } from "@/components/ui/button";
-
 import { Input } from "@/components/ui/input";
-
 import {
   Field,
   FieldError,
   FieldGroup,
   FieldLabel,
 } from "@/components/ui/field";
-
 import { ChaptersList } from "./chapter-list";
-
+import { useRouter } from "next/navigation";
 interface Chapter {
   id: string;
   title: string;
   position: number;
   isPublished: boolean;
 }
-
 interface ChaptersFormProps {
-  initialData: {
-    chapters: Chapter[];
-  };
-
+  chapters: Chapter[];
   courseId: string;
 }
 
@@ -54,13 +38,13 @@ const createChapterSchema = z.object({
 
 type CreateChapterValues = z.infer<typeof createChapterSchema>;
 
-export function ChaptersForm({ initialData, courseId }: ChaptersFormProps) {
+export function ChaptersForm({ chapters, courseId }: ChaptersFormProps) {
   const [isCreating, setIsCreating] = useState(false);
-
   const toggleCreating = () => setIsCreating((current) => !current);
 
-  const trpc = useTRPC();
+  const router = useRouter();
 
+  const trpc = useTRPC();
   const queryClient = useQueryClient();
 
   const form = useForm<CreateChapterValues>({
@@ -130,12 +114,15 @@ export function ChaptersForm({ initialData, courseId }: ChaptersFormProps) {
     await reorderChapters.mutateAsync({
       courseId,
 
-      list: updateData,
+      list: updateData.map((item) => ({
+        chapterId: item.id,
+        position: item.position,
+      })),
     });
   };
 
   const onEdit = (id: string) => {
-    window.location.href = `/dashboard/courses/${courseId}/chapters/${id}`;
+    router.push(`/dashboard/courses/${courseId}/chapters/${id}`);
   };
 
   const isPending = createChapter.isPending || reorderChapters.isPending;
@@ -205,15 +192,15 @@ export function ChaptersForm({ initialData, courseId }: ChaptersFormProps) {
           className={cn(
             "mt-2 text-sm",
 
-            !initialData.chapters.length && "italic text-slate-500",
+            !chapters.length && "italic text-slate-500",
           )}
         >
-          {!initialData.chapters.length && "No chapters"}
+          {!chapters.length && "No chapters yet"}
 
           <ChaptersList
             onEdit={onEdit}
             onReorder={onReorder}
-            items={initialData.chapters}
+            items={chapters}
           />
         </div>
       )}

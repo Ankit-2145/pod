@@ -46,7 +46,6 @@ type ChapterTitleFormValues = z.infer<typeof chapterTitleFormSchema>;
 export function ChapterTitleForm({
   initialData,
   chapterId,
-  courseId,
 }: ChapterTitleFormProps) {
   const [isEditing, setIsEditing] = useState(false);
 
@@ -71,7 +70,6 @@ export function ChapterTitleForm({
 
         await queryClient.invalidateQueries(
           trpc.chapter.getById.queryFilter({
-            courseId,
             chapterId,
           }),
         );

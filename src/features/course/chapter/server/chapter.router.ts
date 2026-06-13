@@ -1,115 +1,69 @@
 import z from "zod";
-
 import { TRPCError } from "@trpc/server";
-
-import { createTRPCRouter, instructorProcedure } from "@/trpc/init";
+import { createTRPCRouter } from "@/trpc/init";
 import { UTApi } from "uploadthing/server";
+import {
+  attachmentOwnerProcedure,
+  chapterDetailsProcedure,
+  chapterOwnerProcedure,
+} from "@/trpc/procedures/chapter-procedures";
+import { courseOwnerProcedure } from "@/trpc/procedures/course-procedures";
 
 export const chapterRouter = createTRPCRouter({
-  create: instructorProcedure
+  create: courseOwnerProcedure
     .input(
       z.object({
         courseId: z.string(),
-
         title: z.string().min(1, {
           message: "Title is required",
         }),
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      const course = await ctx.prisma.course.findUnique({
-        where: {
-          id: input.courseId,
-        },
-      });
-
-      if (!course) {
-        throw new TRPCError({
-          code: "NOT_FOUND",
-          message: "Course not found",
-        });
-      }
-
-      const isOwner = course.authorId === ctx.user.id;
-
-      const isAdmin = ctx.user.role === "admin";
-
-      if (!isOwner && !isAdmin) {
-        throw new TRPCError({
-          code: "FORBIDDEN",
-          message: "Unauthorized",
-        });
-      }
-
       const lastChapter = await ctx.prisma.chapter.findFirst({
         where: {
-          courseId: input.courseId,
+          courseId: ctx.course.id,
         },
 
         orderBy: {
           position: "desc",
         },
+
+        select: {
+          position: true,
+        },
       });
 
       const newPosition = lastChapter ? lastChapter.position + 1 : 1;
 
-      const chapter = await ctx.prisma.chapter.create({
+      return ctx.prisma.chapter.create({
         data: {
           title: input.title,
-
-          courseId: input.courseId,
-
+          courseId: ctx.course.id,
           position: newPosition,
         },
       });
-
-      return chapter;
     }),
 
-  reorder: instructorProcedure
+  reorder: courseOwnerProcedure
     .input(
       z.object({
         courseId: z.string(),
 
         list: z.array(
           z.object({
-            id: z.string(),
-
+            chapterId: z.string(),
             position: z.number(),
           }),
         ),
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      const course = await ctx.prisma.course.findUnique({
-        where: {
-          id: input.courseId,
-        },
-      });
-
-      if (!course) {
-        throw new TRPCError({
-          code: "NOT_FOUND",
-          message: "Course not found",
-        });
-      }
-
-      const isOwner = course.authorId === ctx.user.id;
-
-      const isAdmin = ctx.user.role === "ADMIN";
-
-      if (!isOwner && !isAdmin) {
-        throw new TRPCError({
-          code: "FORBIDDEN",
-          message: "Unauthorized",
-        });
-      }
-
-      await Promise.all(
+      await ctx.prisma.$transaction(
         input.list.map((item) =>
           ctx.prisma.chapter.update({
             where: {
-              id: item.id,
+              id: item.chapterId,
             },
 
             data: {
@@ -118,44 +72,11 @@ export const chapterRouter = createTRPCRouter({
           }),
         ),
       );
-
-      return {
-        success: true,
-      };
     }),
-  getById: instructorProcedure
-    .input(
-      z.object({
-        courseId: z.string(),
-        chapterId: z.string(),
-      }),
-    )
-    .query(async ({ ctx, input }) => {
-      const chapter = await ctx.prisma.chapter.findFirst({
-        where: {
-          id: input.chapterId,
-          courseId: input.courseId,
-        },
-
-        include: {
-          attachments: {
-            orderBy: {
-              createdAt: "desc",
-            },
-          },
-        },
-      });
-
-      if (!chapter) {
-        throw new TRPCError({
-          code: "NOT_FOUND",
-          message: "Chapter not found",
-        });
-      }
-
-      return chapter;
-    }),
-  updateTitle: instructorProcedure
+  getById: chapterDetailsProcedure.query(({ ctx }) => {
+    return ctx.chapter;
+  }),
+  updateTitle: chapterOwnerProcedure
     .input(
       z.object({
         chapterId: z.string(),
@@ -163,42 +84,17 @@ export const chapterRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      const chapter = await ctx.prisma.chapter.findUnique({
-        where: {
-          id: input.chapterId,
-        },
-        include: {
-          course: {
-            select: {
-              authorId: true,
-            },
-          },
-        },
-      });
-
-      if (!chapter) {
-        throw new TRPCError({
-          code: "NOT_FOUND",
-          message: "Chapter not found",
-        });
-      }
-
-      if (chapter.course.authorId !== ctx.user.id) {
-        throw new TRPCError({
-          code: "FORBIDDEN",
-        });
-      }
-
       return await ctx.prisma.chapter.update({
         where: {
-          id: input.chapterId,
+          id: ctx.chapter.id,
         },
+
         data: {
           title: input.title,
         },
       });
     }),
-  updateDescription: instructorProcedure
+  updateDescription: chapterOwnerProcedure
     .input(
       z.object({
         chapterId: z.string(),
@@ -206,41 +102,17 @@ export const chapterRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      const chapter = await ctx.prisma.chapter.findUnique({
+      return await ctx.prisma.chapter.update({
         where: {
-          id: input.chapterId,
+          id: ctx.chapter.id,
         },
-        include: {
-          course: {
-            select: {
-              authorId: true,
-            },
-          },
-        },
-      });
 
-      if (!chapter) {
-        throw new TRPCError({
-          code: "NOT_FOUND",
-        });
-      }
-
-      if (chapter.course.authorId !== ctx.user.id) {
-        throw new TRPCError({
-          code: "FORBIDDEN",
-        });
-      }
-
-      return ctx.prisma.chapter.update({
-        where: {
-          id: input.chapterId,
-        },
         data: {
           description: input.description,
         },
       });
     }),
-  updateAccess: instructorProcedure
+  updateAccess: chapterOwnerProcedure
     .input(
       z.object({
         chapterId: z.string(),
@@ -248,41 +120,17 @@ export const chapterRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      const chapter = await ctx.prisma.chapter.findUnique({
+      return await ctx.prisma.chapter.update({
         where: {
-          id: input.chapterId,
+          id: ctx.chapter.id,
         },
-        include: {
-          course: {
-            select: {
-              authorId: true,
-            },
-          },
-        },
-      });
 
-      if (!chapter) {
-        throw new TRPCError({
-          code: "NOT_FOUND",
-        });
-      }
-
-      if (chapter.course.authorId !== ctx.user.id) {
-        throw new TRPCError({
-          code: "FORBIDDEN",
-        });
-      }
-
-      return ctx.prisma.chapter.update({
-        where: {
-          id: input.chapterId,
-        },
         data: {
           isFree: input.isFree,
         },
       });
     }),
-  updateVideoUrl: instructorProcedure
+  updateVideoUrl: chapterOwnerProcedure
     .input(
       z.object({
         chapterId: z.string(),
@@ -290,44 +138,17 @@ export const chapterRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      const chapter = await ctx.prisma.chapter.findUnique({
+      return await ctx.prisma.chapter.update({
         where: {
-          id: input.chapterId,
+          id: ctx.chapter.id,
         },
-        include: {
-          course: {
-            select: {
-              authorId: true,
-            },
-          },
-        },
-      });
 
-      if (!chapter) {
-        throw new TRPCError({
-          code: "NOT_FOUND",
-        });
-      }
-
-      if (
-        ctx.user.role !== "admin" &&
-        chapter.course.authorId !== ctx.user.id
-      ) {
-        throw new TRPCError({
-          code: "FORBIDDEN",
-        });
-      }
-
-      return ctx.prisma.chapter.update({
-        where: {
-          id: input.chapterId,
-        },
         data: {
           videoUrl: input.videoUrl,
         },
       });
     }),
-  createAttachment: instructorProcedure
+  createAttachment: chapterOwnerProcedure
     .input(
       z.object({
         chapterId: z.string(),
@@ -337,37 +158,9 @@ export const chapterRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      const chapter = await ctx.prisma.chapter.findUnique({
-        where: {
-          id: input.chapterId,
-        },
-        include: {
-          course: {
-            select: {
-              authorId: true,
-            },
-          },
-        },
-      });
-
-      if (!chapter) {
-        throw new TRPCError({
-          code: "NOT_FOUND",
-        });
-      }
-
-      if (
-        chapter.course.authorId !== ctx.user.id &&
-        ctx.user.role !== "ADMIN"
-      ) {
-        throw new TRPCError({
-          code: "FORBIDDEN",
-        });
-      }
-
-      return ctx.prisma.attachment.create({
+      return await ctx.prisma.attachment.create({
         data: {
-          chapterId: input.chapterId,
+          chapterId: ctx.chapter.id,
           url: input.url,
           name: input.name,
           fileKey: input.fileKey,
@@ -375,182 +168,76 @@ export const chapterRouter = createTRPCRouter({
       });
     }),
 
-  deleteAttachment: instructorProcedure
+  deleteAttachment: attachmentOwnerProcedure
     .input(
       z.object({
         attachmentId: z.string(),
       }),
     )
-    .mutation(async ({ ctx, input }) => {
+    .mutation(async ({ ctx }) => {
       const utapi = new UTApi();
 
-      const attachment = await ctx.prisma.attachment.findUnique({
+      await utapi.deleteFiles(ctx.attachment.fileKey);
+
+      await ctx.prisma.attachment.delete({
         where: {
-          id: input.attachmentId,
-        },
-        include: {
-          chapter: {
-            include: {
-              course: {
-                select: {
-                  authorId: true,
-                },
-              },
-            },
-          },
-        },
-      });
-
-      if (!attachment) {
-        throw new TRPCError({
-          code: "NOT_FOUND",
-        });
-      }
-
-      if (
-        attachment.chapter?.course.authorId !== ctx.user.id &&
-        ctx.user.role !== "ADMIN"
-      ) {
-        throw new TRPCError({
-          code: "FORBIDDEN",
-        });
-      }
-
-      await utapi.deleteFiles(attachment.fileKey);
-
-      return ctx.prisma.attachment.delete({
-        where: {
-          id: input.attachmentId,
+          id: ctx.attachment.id,
         },
       });
     }),
 
-  publish: instructorProcedure
+  publish: chapterOwnerProcedure
     .input(
       z.object({
         chapterId: z.string(),
       }),
     )
-    .mutation(async ({ ctx, input }) => {
-      const chapter = await ctx.prisma.chapter.findUnique({
+    .mutation(async ({ ctx }) => {
+      return await ctx.prisma.chapter.update({
         where: {
-          id: input.chapterId,
-        },
-        include: {
-          course: {
-            select: {
-              authorId: true,
-            },
-          },
-        },
-      });
-
-      if (!chapter) {
-        throw new TRPCError({
-          code: "NOT_FOUND",
-        });
-      }
-
-      const isOwner = chapter.course.authorId === ctx.user.id;
-      const isAdmin = ctx.user.role === "ADMIN";
-
-      if (!isOwner && !isAdmin) {
-        throw new TRPCError({
-          code: "FORBIDDEN",
-        });
-      }
-
-      return ctx.prisma.chapter.update({
-        where: {
-          id: input.chapterId,
+          id: ctx.chapter.id,
         },
         data: {
           isPublished: true,
         },
       });
     }),
-  unpublish: instructorProcedure
+
+  unpublish: chapterOwnerProcedure
     .input(
       z.object({
         chapterId: z.string(),
       }),
     )
-    .mutation(async ({ ctx, input }) => {
-      const chapter = await ctx.prisma.chapter.findUnique({
+    .mutation(async ({ ctx }) => {
+      return await ctx.prisma.chapter.update({
         where: {
-          id: input.chapterId,
+          id: ctx.chapter.id,
         },
-        include: {
-          course: {
-            select: {
-              authorId: true,
-            },
-          },
-        },
-      });
 
-      if (!chapter) {
-        throw new TRPCError({
-          code: "NOT_FOUND",
-        });
-      }
-
-      const isOwner = chapter.course.authorId === ctx.user.id;
-      const isAdmin = ctx.user.role === "ADMIN";
-
-      if (!isOwner && !isAdmin) {
-        throw new TRPCError({
-          code: "FORBIDDEN",
-        });
-      }
-
-      return ctx.prisma.chapter.update({
-        where: {
-          id: input.chapterId,
-        },
         data: {
           isPublished: false,
         },
       });
     }),
-  delete: instructorProcedure
+
+  delete: chapterOwnerProcedure
     .input(
       z.object({
         chapterId: z.string(),
       }),
     )
-    .mutation(async ({ ctx, input }) => {
-      const chapter = await ctx.prisma.chapter.findUnique({
-        where: {
-          id: input.chapterId,
-        },
-        include: {
-          course: {
-            select: {
-              authorId: true,
-            },
-          },
-        },
-      });
-
-      if (!chapter) {
+    .mutation(async ({ ctx }) => {
+      if (ctx.chapter.isPublished) {
         throw new TRPCError({
-          code: "NOT_FOUND",
+          code: "BAD_REQUEST",
+          message: "Unpublish the chapter before deleting it",
         });
       }
 
-      const isOwner = chapter.course.authorId === ctx.user.id;
-      const isAdmin = ctx.user.role === "ADMIN";
-
-      if (!isOwner && !isAdmin) {
-        throw new TRPCError({
-          code: "FORBIDDEN",
-        });
-      }
-
-      return ctx.prisma.chapter.delete({
+      await ctx.prisma.chapter.delete({
         where: {
-          id: input.chapterId,
+          id: ctx.chapter.id,
         },
       });
     }),

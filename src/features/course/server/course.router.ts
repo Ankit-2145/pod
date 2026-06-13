@@ -1,6 +1,7 @@
 import z from "zod";
 import { TRPCError } from "@trpc/server";
 import {
+  adminProcedure,
   createTRPCRouter,
   instructorProcedure,
   protectedProcedure,
@@ -8,6 +9,10 @@ import {
 import { UTApi } from "uploadthing/server";
 import { razorpay } from "@/lib/razorpay";
 import crypto from "crypto";
+import {
+  courseDetailsProcedure,
+  courseOwnerProcedure,
+} from "@/trpc/procedures/course-procedures";
 
 export const courseRouter = createTRPCRouter({
   create: instructorProcedure
@@ -32,77 +37,125 @@ export const courseRouter = createTRPCRouter({
       return course;
     }),
 
-  getById: instructorProcedure
-    .input(
-      z.object({
-        courseId: z.string(),
-      }),
-    )
-    .query(async ({ ctx, input }) => {
-      const course = await ctx.prisma.course.findUnique({
-        where: {
-          id: input.courseId,
-        },
-        include: {
-          chapters: {
-            orderBy: {
-              position: "asc",
-            },
+  getById: courseDetailsProcedure.query(({ ctx }) => {
+    return ctx.course;
+  }),
+  getEnrolledCourses: protectedProcedure.query(async ({ ctx }) => {
+    return ctx.prisma.course.findMany({
+      where: {
+        purchases: {
+          some: {
+            userId: ctx.user.id,
           },
         },
-      });
+        isPublished: true,
+      },
 
-      if (!course) {
-        throw new TRPCError({
-          code: "NOT_FOUND",
-        });
-      }
+      include: {
+        author: {
+          select: {
+            name: true,
+          },
+        },
 
-      const isOwner = course.authorId === ctx.user.id;
+        _count: {
+          select: {
+            chapters: true,
+          },
+        },
+      },
 
-      const isAdmin = ctx.user.role === "admin";
-      const isSuperAdmin = ctx.user.role === "superAdmin";
+      orderBy: {
+        createdAt: "desc",
+      },
+    });
+  }),
+  getInstructorCourses: instructorProcedure.query(async ({ ctx }) => {
+    return ctx.prisma.course.findMany({
+      where: {
+        authorId: ctx.user.id,
+      },
 
-      if (!isOwner && !isAdmin && !isSuperAdmin) {
-        throw new TRPCError({
-          code: "FORBIDDEN",
-        });
-      }
+      include: {
+        _count: {
+          select: {
+            chapters: true,
+          },
+        },
+      },
 
-      return course;
-    }),
+      orderBy: {
+        createdAt: "desc",
+      },
+    });
+  }),
+  getAllCourses: adminProcedure.query(async ({ ctx }) => {
+    return ctx.prisma.course.findMany({
+      include: {
+        author: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+          },
+        },
+
+        _count: {
+          select: {
+            chapters: true,
+          },
+        },
+      },
+
+      orderBy: {
+        createdAt: "desc",
+      },
+    });
+  }),
   getDashboardCourses: protectedProcedure.query(async ({ ctx }) => {
-    const userId = ctx.user.id;
-    const role = ctx.user.role;
+    const { id: userId, role } = ctx.user;
 
-    // Admin sees everything
+    const baseInclude = {
+      _count: {
+        select: {
+          chapters: true,
+        },
+      },
+    };
+
     if (role === "admin" || role === "superAdmin") {
       return ctx.prisma.course.findMany({
         include: {
-          chapters: true,
+          ...baseInclude,
+
+          author: {
+            select: {
+              id: true,
+              name: true,
+            },
+          },
         },
+
         orderBy: {
           createdAt: "desc",
         },
       });
     }
 
-    // Instructor sees only their own courses
     if (role === "instructor") {
       return ctx.prisma.course.findMany({
         where: {
           authorId: userId,
         },
-        include: {
-          chapters: true,
-        },
+
+        include: baseInclude,
+
         orderBy: {
           createdAt: "desc",
         },
       });
     }
 
-    // Student/User sees enrolled courses only
     return ctx.prisma.course.findMany({
       where: {
         purchases: {
@@ -110,113 +163,64 @@ export const courseRouter = createTRPCRouter({
             userId,
           },
         },
+
         isPublished: true,
       },
+
       include: {
-        chapters: {
-          where: {
-            isPublished: true,
-          },
-          orderBy: {
-            position: "asc",
+        ...baseInclude,
+
+        author: {
+          select: {
+            id: true,
+            name: true,
           },
         },
       },
+
       orderBy: {
         createdAt: "desc",
       },
     });
   }),
-  updateTitle: instructorProcedure
+  updateTitle: courseOwnerProcedure
     .input(
       z.object({
         courseId: z.string(),
-
         title: z.string().min(1, {
           message: "Title is required",
         }),
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      const course = await ctx.prisma.course.findUnique({
+      return await ctx.prisma.course.update({
         where: {
-          id: input.courseId,
+          id: ctx.course.id,
         },
-      });
-
-      if (!course) {
-        throw new TRPCError({
-          code: "NOT_FOUND",
-        });
-      }
-
-      const isInstructor = course.authorId === ctx.user.id;
-
-      const isAdmin = ctx.user.role === "Admin";
-
-      const isSuperAdmin = ctx.user.role === "superAdmin";
-
-      if (!isInstructor && !isAdmin && !isSuperAdmin) {
-        throw new TRPCError({
-          code: "FORBIDDEN",
-        });
-      }
-
-      const updatedCourse = await ctx.prisma.course.update({
-        where: {
-          id: input.courseId,
-        },
-
         data: {
           title: input.title,
         },
       });
-
-      return updatedCourse;
     }),
-  updateShortDescription: instructorProcedure
+  updateShortDescription: courseOwnerProcedure
     .input(
       z.object({
         courseId: z.string(),
-
         shortDescription: z.string().min(1).max(200),
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      const course = await ctx.prisma.course.findUnique({
+      return await ctx.prisma.course.update({
         where: {
-          id: input.courseId,
+          id: ctx.course.id,
         },
-      });
-
-      if (!course) {
-        throw new TRPCError({
-          code: "NOT_FOUND",
-        });
-      }
-
-      const isOwner = course.authorId === ctx.user.id;
-
-      const isAdmin = ctx.user.role === "ADMIN";
-
-      if (!isOwner && !isAdmin) {
-        throw new TRPCError({
-          code: "FORBIDDEN",
-        });
-      }
-
-      return ctx.prisma.course.update({
-        where: {
-          id: input.courseId,
-        },
-
         data: {
           shortDescription: input.shortDescription,
         },
       });
     }),
 
-  updateDescription: instructorProcedure
+  updateDescription: courseOwnerProcedure
     .input(
       z.object({
         courseId: z.string(),
@@ -226,41 +230,16 @@ export const courseRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      const course = await ctx.prisma.course.findUnique({
+      return await ctx.prisma.course.update({
         where: {
-          id: input.courseId,
+          id: ctx.course.id,
         },
-      });
-
-      if (!course) {
-        throw new TRPCError({
-          code: "NOT_FOUND",
-        });
-      }
-
-      const isOwner = course.authorId === ctx.user.id;
-
-      const isAdmin = ctx.user.role === "ADMIN";
-
-      if (!isOwner && !isAdmin) {
-        throw new TRPCError({
-          code: "FORBIDDEN",
-        });
-      }
-
-      const updatedCourse = await ctx.prisma.course.update({
-        where: {
-          id: input.courseId,
-        },
-
         data: {
           description: input.description,
         },
       });
-
-      return updatedCourse;
     }),
-  updateImage: instructorProcedure
+  updateImage: courseOwnerProcedure
     .input(
       z.object({
         courseId: z.string(),
@@ -269,36 +248,15 @@ export const courseRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      const course = await ctx.prisma.course.findUnique({
-        where: {
-          id: input.courseId,
-        },
-      });
-
-      if (!course) {
-        throw new TRPCError({
-          code: "NOT_FOUND",
-        });
-      }
-
-      const isOwner = course.authorId === ctx.user.id;
-      const isAdmin = ctx.user.role === "admin";
-
-      if (!isOwner && !isAdmin) {
-        throw new TRPCError({
-          code: "FORBIDDEN",
-        });
-      }
-
       const utapi = new UTApi();
 
-      if (course.imageFileKey) {
-        await utapi.deleteFiles(course.imageFileKey);
+      if (ctx.course.imageFileKey) {
+        await utapi.deleteFiles(ctx.course.imageFileKey);
       }
 
-      return ctx.prisma.course.update({
+      return await ctx.prisma.course.update({
         where: {
-          id: input.courseId,
+          id: ctx.course.id,
         },
         data: {
           imageUrl: input.imageUrl,
@@ -306,236 +264,112 @@ export const courseRouter = createTRPCRouter({
         },
       });
     }),
-  updateCategory: instructorProcedure
+  updateCategory: courseOwnerProcedure
     .input(
       z.object({
         courseId: z.string(),
-
         categoryId: z.string(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      const course = await ctx.prisma.course.findUnique({
+      return await ctx.prisma.course.update({
         where: {
-          id: input.courseId,
+          id: ctx.course.id,
         },
-      });
-
-      if (!course) {
-        throw new TRPCError({
-          code: "NOT_FOUND",
-        });
-      }
-
-      const isOwner = course.authorId === ctx.user.id;
-
-      const isAdmin = ctx.user.role === "ADMIN";
-
-      if (!isOwner && !isAdmin) {
-        throw new TRPCError({
-          code: "FORBIDDEN",
-        });
-      }
-
-      return ctx.prisma.course.update({
-        where: {
-          id: input.courseId,
-        },
-
         data: {
           categoryId: input.categoryId,
         },
       });
     }),
 
-  updatePrice: instructorProcedure
+  updatePrice: courseOwnerProcedure
     .input(
-      z.object({
-        courseId: z.string(),
-
-        originalPrice: z.number().nullable(),
-
-        price: z.number().nullable(),
-      }),
+      z
+        .object({
+          courseId: z.string(),
+          originalPrice: z.number().nullable(),
+          price: z.number().nullable(),
+        })
+        .refine(
+          (data) =>
+            data.price === null ||
+            data.originalPrice === null ||
+            data.price <= data.originalPrice,
+          {
+            message: "Discount price cannot be greater than original price",
+            path: ["price"],
+          },
+        ),
     )
     .mutation(async ({ ctx, input }) => {
-      const course = await ctx.prisma.course.findUnique({
+      return await ctx.prisma.course.update({
         where: {
-          id: input.courseId,
+          id: ctx.course.id,
         },
-      });
-
-      if (!course) {
-        throw new TRPCError({
-          code: "NOT_FOUND",
-        });
-      }
-
-      const isOwner = course.authorId === ctx.user.id;
-
-      const isAdmin = ctx.user.role === "ADMIN";
-
-      if (!isOwner && !isAdmin) {
-        throw new TRPCError({
-          code: "FORBIDDEN",
-        });
-      }
-
-      if (
-        input.price !== null &&
-        input.originalPrice !== null &&
-        input.price > input.originalPrice
-      ) {
-        throw new TRPCError({
-          code: "BAD_REQUEST",
-
-          message: "Discount price cannot be greater than original price",
-        });
-      }
-
-      return ctx.prisma.course.update({
-        where: {
-          id: input.courseId,
-        },
-
         data: {
           originalPrice: input.originalPrice,
-
           price: input.price,
         },
       });
     }),
 
-  publish: instructorProcedure
+  publish: courseOwnerProcedure
     .input(
       z.object({
         courseId: z.string(),
       }),
     )
-    .mutation(async ({ ctx, input }) => {
-      const course = await ctx.prisma.course.findUnique({
+    .mutation(async ({ ctx }) => {
+      return await ctx.prisma.course.update({
         where: {
-          id: input.courseId,
-        },
-      });
-
-      if (!course) {
-        throw new TRPCError({
-          code: "NOT_FOUND",
-          message: "Course not found",
-        });
-      }
-
-      const isOwner = course.authorId === ctx.user.id;
-
-      const isAdmin = ctx.user.role === "admin";
-      const isSuperAdmin = ctx.user.role === "superAdmin";
-
-      if (!isOwner && !isAdmin && !isSuperAdmin) {
-        throw new TRPCError({
-          code: "FORBIDDEN",
-          message: "Unauthorized",
-        });
-      }
-
-      const updatedCourse = await ctx.prisma.course.update({
-        where: {
-          id: input.courseId,
+          id: ctx.course.id,
         },
 
         data: {
           isPublished: true,
         },
       });
-
-      return updatedCourse;
     }),
 
-  unpublish: instructorProcedure
+  unpublish: courseOwnerProcedure
     .input(
       z.object({
         courseId: z.string(),
       }),
     )
-    .mutation(async ({ ctx, input }) => {
-      const course = await ctx.prisma.course.findUnique({
+    .mutation(async ({ ctx }) => {
+      return await ctx.prisma.course.update({
         where: {
-          id: input.courseId,
-        },
-      });
-
-      if (!course) {
-        throw new TRPCError({
-          code: "NOT_FOUND",
-          message: "Course not found",
-        });
-      }
-
-      const isOwner = course.authorId === ctx.user.id;
-
-      const isAdmin = ctx.user.role === "ADMIN";
-
-      if (!isOwner && !isAdmin) {
-        throw new TRPCError({
-          code: "FORBIDDEN",
-          message: "Unauthorized",
-        });
-      }
-
-      const updatedCourse = await ctx.prisma.course.update({
-        where: {
-          id: input.courseId,
+          id: ctx.course.id,
         },
 
         data: {
           isPublished: false,
         },
       });
-
-      return updatedCourse;
     }),
 
-  delete: instructorProcedure
+  delete: courseOwnerProcedure
     .input(
       z.object({
         courseId: z.string(),
       }),
     )
-    .mutation(async ({ ctx, input }) => {
-      const course = await ctx.prisma.course.findUnique({
-        where: {
-          id: input.courseId,
-        },
-      });
-
-      if (!course) {
+    .mutation(async ({ ctx }) => {
+      if (ctx.course.isPublished) {
         throw new TRPCError({
-          code: "NOT_FOUND",
-          message: "Course not found",
-        });
-      }
-
-      const isOwner = course.authorId === ctx.user.id;
-
-      const isAdmin = ctx.user.role === "admin";
-
-      if (!isOwner && !isAdmin) {
-        throw new TRPCError({
-          code: "FORBIDDEN",
-          message: "Unauthorized",
+          code: "BAD_REQUEST",
+          message: "Unpublish the course before deleting it",
         });
       }
 
       await ctx.prisma.course.delete({
         where: {
-          id: input.courseId,
+          id: ctx.course.id,
         },
       });
-
-      return {
-        success: true,
-      };
     }),
+
   getPublished: protectedProcedure.query(async ({ ctx }) => {
     const user = ctx.user;
 

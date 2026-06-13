@@ -22,9 +22,9 @@ const t = initTRPC.context<Context>().create({
 });
 export const createTRPCRouter = t.router;
 export const createCallerFactory = t.createCallerFactory;
-export const baseProcedure = t.procedure;
+export const publicProcedure = t.procedure;
 
-export const protectedProcedure = baseProcedure.use(async ({ ctx, next }) => {
+export const protectedProcedure = publicProcedure.use(async ({ ctx, next }) => {
   if (!ctx.session) {
     throw new TRPCError({
       code: "UNAUTHORIZED",
@@ -64,3 +64,17 @@ export const adminProcedure = protectedProcedure.use(async ({ ctx, next }) => {
 
   return next();
 });
+
+export const superAdminProcedure = protectedProcedure.use(
+  async ({ ctx, next }) => {
+    const role = ctx.user.role;
+
+    if (role !== "superAdmin") {
+      throw new TRPCError({
+        code: "FORBIDDEN",
+      });
+    }
+
+    return next();
+  },
+);

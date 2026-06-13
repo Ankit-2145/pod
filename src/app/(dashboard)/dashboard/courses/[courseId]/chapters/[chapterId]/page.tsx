@@ -39,7 +39,6 @@ export default async function ChapterIdPage({ params }: PageProps) {
 
   prefetch(
     trpc.chapter.getById.queryOptions({
-      courseId,
       chapterId,
     }),
   );

@@ -18,7 +18,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-interface Props {
+interface CategoryFormProps {
   courseId: string;
 
   initialData: {
@@ -26,7 +26,11 @@ interface Props {
   };
 }
 
-export function CategoryForm({ courseId, initialData }: Props) {
+type CategoryFormValues = {
+  categoryId: string;
+};
+
+export function CategoryForm({ courseId, initialData }: CategoryFormProps) {
   const trpc = useTRPC();
 
   const queryClient = useQueryClient();
@@ -46,17 +50,26 @@ export function CategoryForm({ courseId, initialData }: Props) {
           }),
         );
       },
+
+      onError: (error) => {
+        toast.error(error.message);
+      },
     }),
   );
 
-  //   Add onupdate Category function for form
+  const onUpdateCategory = async (values: CategoryFormValues) => {
+    await updateCategory.mutateAsync({
+      courseId,
+
+      categoryId: values.categoryId,
+    });
+  };
 
   return (
     <Select
-      defaultValue={initialData.categoryId || undefined}
+      defaultValue={initialData.categoryId ?? undefined}
       onValueChange={async (value) => {
-        await updateCategory.mutateAsync({
-          courseId,
+        await onUpdateCategory({
           categoryId: value,
         });
       }}
