@@ -36,7 +36,7 @@ export function CategoryForm({ courseId, initialData }: CategoryFormProps) {
   const queryClient = useQueryClient();
 
   const { data: categories } = useSuspenseQuery(
-    trpc.category.getMany.queryOptions(),
+    trpc.category.getActive.queryOptions(),
   );
 
   const updateCategory = useMutation(

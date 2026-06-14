@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Inter, Source_Serif_4, JetBrains_Mono } from "next/font/google";
+import { Urbanist, Montserrat } from "next/font/google";
 import "./globals.css";
 
 import { TRPCReactProvider } from "@/trpc/client";
@@ -8,20 +8,16 @@ import { ThemeProvider } from "@/components/providers/theme-provider";
 import { ImpersonationIndicator } from "@/features/admin/components/impersonation-indicator";
 import Script from "next/script";
 
-const fontSans = Inter({
+const fontUrbanist = Urbanist({
   subsets: ["latin"],
-  variable: "--font-sans",
+  variable: "--font-urbanist",
 });
 
-const fontSerif = Source_Serif_4({
+const fontMontserrat = Montserrat({
   subsets: ["latin"],
-  variable: "--font-serif",
+  variable: "--font-montserrat",
 });
 
-const fontMono = JetBrains_Mono({
-  subsets: ["latin"],
-  variable: "--font-mono",
-});
 export const metadata: Metadata = {
   title: "Pod LMS | Connecting Learners",
   description: "Connecting Learners",
@@ -35,7 +31,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body
-        className={`${fontSans.variable} ${fontSerif.variable} ${fontMono.variable} antialiased`}
+        className={`${fontUrbanist.variable} ${fontMontserrat.variable} antialiased`}
       >
         <TRPCReactProvider>
           <ThemeProvider

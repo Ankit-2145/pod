@@ -1,7 +1,6 @@
 "use client";
 
 import * as React from "react";
-import Link from "next/link";
 import {
   ColumnDef,
   ColumnFiltersState,
@@ -33,9 +32,7 @@ interface DataTableProps<TData, TValue> {
   searchColumn?: string;
   searchPlaceholder?: string;
 
-  createHref?: string;
-  createLabel?: string;
-  createIcon?: React.ReactNode;
+  action?: React.ReactNode;
 }
 
 export function DataTable<TData, TValue>({
@@ -43,9 +40,7 @@ export function DataTable<TData, TValue>({
   data,
   searchColumn,
   searchPlaceholder = "Search...",
-  createHref,
-  createLabel,
-  createIcon,
+  action,
 }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
@@ -88,17 +83,10 @@ export function DataTable<TData, TValue>({
           <div />
         )}
 
-        {createHref && createLabel && (
-          <Link href={createHref}>
-            <Button>
-              {createIcon}
-              {createLabel}
-            </Button>
-          </Link>
-        )}
+        {action}
       </div>
 
-      <div className="rounded-md border">
+      <div className="rounded-xl border">
         <Table>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (

@@ -5,9 +5,15 @@ import {
   createTRPCRouter,
   adminProcedure,
   instructorProcedure,
+  superAdminProcedure,
 } from "@/trpc/init";
 
 export const categoryRouter = createTRPCRouter({
+  /**
+   * - Create a new category
+   * - Admins and super admins can create categories
+   */
+
   create: adminProcedure
     .input(
       z.object({
@@ -50,41 +56,10 @@ export const categoryRouter = createTRPCRouter({
       });
     }),
 
-  getBySlug: adminProcedure
-    .input(
-      z.object({
-        slug: z.string(),
-      }),
-    )
-    .query(async ({ ctx, input }) => {
-      const category = await ctx.prisma.category.findUnique({
-        where: {
-          slug: input.slug,
-        },
-
-        select: {
-          id: true,
-          name: true,
-          slug: true,
-          isActive: true,
-
-          _count: {
-            select: {
-              courses: true,
-            },
-          },
-        },
-      });
-
-      if (!category) {
-        throw new TRPCError({
-          code: "NOT_FOUND",
-        });
-      }
-
-      return category;
-    }),
-
+  /**
+   * - Get category by ID
+   * - Admins and super admins can access this endpoint
+   */
   getById: adminProcedure
     .input(
       z.object({
@@ -121,12 +96,12 @@ export const categoryRouter = createTRPCRouter({
       return category;
     }),
 
+  /**
+   * - Get many categories
+   * - Instructors and above can access this endpoint
+   */
   getMany: instructorProcedure.query(async ({ ctx }) => {
     return ctx.prisma.category.findMany({
-      where: {
-        isActive: true,
-      },
-
       orderBy: {
         name: "asc",
       },
@@ -144,6 +119,33 @@ export const categoryRouter = createTRPCRouter({
       },
     });
   }),
+
+  /**
+   * - Get active categories for course creation form
+   * - Instructors and above can access this endpoint
+   */
+
+  getActive: instructorProcedure.query(async ({ ctx }) => {
+    return ctx.prisma.category.findMany({
+      where: {
+        isActive: true,
+      },
+
+      orderBy: {
+        name: "asc",
+      },
+
+      select: {
+        id: true,
+        name: true,
+      },
+    });
+  }),
+
+  /**
+   * - Update category name
+   * - Admins and super admins can update category name
+   */
 
   update: adminProcedure
     .input(
@@ -198,7 +200,12 @@ export const categoryRouter = createTRPCRouter({
       });
     }),
 
-  archive: adminProcedure
+  /**
+   * - Inactivate a category
+   * - Admins and super admins can inactivate categories
+   */
+
+  inActive: adminProcedure
     .input(
       z.object({
         categoryId: z.string(),
@@ -216,7 +223,35 @@ export const categoryRouter = createTRPCRouter({
       });
     }),
 
-  delete: adminProcedure
+  /**
+   * - Activate a category
+   * - Admins and super admins can activate categories
+   */
+
+  Active: adminProcedure
+    .input(
+      z.object({
+        categoryId: z.string(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      return ctx.prisma.category.update({
+        where: {
+          id: input.categoryId,
+        },
+        data: {
+          isActive: true,
+        },
+      });
+    }),
+
+  /**
+   * - Delete a category
+   * - Only allowed if the category is not assigned to any courses
+   * - Only super admins can delete categories
+   */
+
+  delete: superAdminProcedure
     .input(
       z.object({
         categoryId: z.string(),
