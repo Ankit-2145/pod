@@ -11,6 +11,7 @@ import { EditCategory } from "./edit-category-drawer/edit-category";
 import { DataTable } from "@/components/layouts/data-table";
 import { CreateCategory } from "./create-category";
 import { DashboardHeading } from "@/components/shared/dashboard-heading";
+import { TagsIcon } from "lucide-react";
 
 type Category = {
   id: string;
@@ -39,6 +40,7 @@ export function CategoryTable() {
         <DashboardHeading
           title="Categories"
           description="Manage course categories for the platform."
+          icon={TagsIcon}
         />
 
         <DataTable

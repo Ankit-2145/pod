@@ -3,8 +3,8 @@
 import * as React from "react";
 import {
   Building2Icon,
-  Columns3CogIcon,
-  FolderIcon,
+  LayoutIcon,
+  TagsIcon,
   UserRoundCogIcon,
   Users2Icon,
 } from "lucide-react";
@@ -26,12 +26,12 @@ const data = {
     {
       name: "Admin Dashboard",
       url: "/admin",
-      icon: Columns3CogIcon,
+      icon: LayoutIcon,
     },
     {
       name: "Categories",
       url: "/admin/categories",
-      icon: FolderIcon,
+      icon: TagsIcon,
     },
   ],
   navMain: [
@@ -45,7 +45,6 @@ const data = {
           icon: Users2Icon,
         },
       ],
-      isActive: true,
     },
 
     {
