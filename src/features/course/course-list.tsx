@@ -13,7 +13,6 @@ import { Button } from "@/components/ui/button";
 
 import { formatPrice } from "@/lib/course/format";
 import { RichTextPreview } from "./text-editor/rich-text-preview";
-import { CourseEnrollButton } from "./enroll-button";
 
 export function CoursesList() {
   const trpc = useTRPC();
@@ -73,7 +72,7 @@ export function CoursesList() {
             </div>
 
             <div className="flex items-center justify-between text-sm">
-              <span>{course.chapters.length} chapters</span>
+              <span>{course.totalChapters} chapters</span>
 
               {course.price && (
                 <span className="font-semibold">
@@ -83,15 +82,20 @@ export function CoursesList() {
             </div>
 
             {course.canManage ? (
+              <div className="flex flex-col gap-2">
+                <Button asChild className="w-full">
+                  <Link href={`/dashboard/courses/${course.id}`}>
+                    Manage Course
+                  </Link>
+                </Button>
+                <Button asChild className="w-full" variant="outline">
+                  <Link href={`/courses/${course.id}`}>View Course</Link>
+                </Button>
+              </div>
+            ) : (
               <Button asChild className="w-full">
                 <Link href={`/courses/${course.id}`}>View Course</Link>
               </Button>
-            ) : (
-              <CourseEnrollButton
-                courseId={course.id}
-                price={course.price ?? undefined}
-                isPurchased={course.isPurchased}
-              />
             )}
           </CardContent>
         </Card>

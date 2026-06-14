@@ -33,7 +33,14 @@ export function CourseEnrollButton({
   const trpc = useTRPC();
 
   const createCheckout = useMutation(
-    trpc.course.createCheckout.mutationOptions(),
+    trpc.course.createCheckout.mutationOptions({
+      onError: (error) => {
+        if (error.data?.code === "UNAUTHORIZED") {
+          toast.error("Please sign in to purchase this course");
+          return;
+        }
+      },
+    }),
   );
 
   const verifyPayment = useMutation(
@@ -55,59 +62,51 @@ export function CourseEnrollButton({
   }
 
   const onEnroll = async () => {
-    try {
-      const checkout = await createCheckout.mutateAsync({
-        courseId,
-      });
+    const checkout = await createCheckout.mutateAsync({
+      courseId,
+    });
 
-      const razorpay = new (window as any).Razorpay({
-        key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID!,
-        amount: checkout.amount,
-        currency: checkout.currency,
-        order_id: checkout.orderId,
+    const razorpay = new (window as any).Razorpay({
+      key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID!,
+      amount: checkout.amount,
+      currency: checkout.currency,
+      order_id: checkout.orderId,
 
-        name: "Your LMS",
-        description: checkout.course.title,
+      name: "Your LMS",
+      description: checkout.course.title,
 
-        prefill: {
-          name: checkout.user.name,
-          email: checkout.user.email,
+      prefill: {
+        name: checkout.user.name,
+        email: checkout.user.email,
+      },
+
+      handler: async (response: {
+        razorpay_order_id: string;
+        razorpay_payment_id: string;
+        razorpay_signature: string;
+      }) => {
+        await verifyPayment.mutateAsync({
+          courseId,
+          razorpay_order_id: response.razorpay_order_id,
+          razorpay_payment_id: response.razorpay_payment_id,
+          razorpay_signature: response.razorpay_signature,
+        });
+
+        await queryClient.invalidateQueries();
+
+        toast.success("Enrollment successful");
+
+        router.push(`/courses/${courseId}/chapters/${checkout.firstChapterId}`);
+      },
+
+      modal: {
+        ondismiss: () => {
+          toast.info("Payment cancelled");
         },
+      },
+    });
 
-        handler: async (response: {
-          razorpay_order_id: string;
-          razorpay_payment_id: string;
-          razorpay_signature: string;
-        }) => {
-          await verifyPayment.mutateAsync({
-            courseId,
-            razorpay_order_id: response.razorpay_order_id,
-            razorpay_payment_id: response.razorpay_payment_id,
-            razorpay_signature: response.razorpay_signature,
-          });
-
-          await queryClient.invalidateQueries();
-
-          toast.success("Enrollment successful");
-
-          router.push(`/courses/${courseId}`);
-        },
-
-        modal: {
-          ondismiss: () => {
-            toast.info("Payment cancelled");
-          },
-        },
-      });
-
-      razorpay.open();
-    } catch (error) {
-      console.error(error);
-
-      toast.error(
-        error instanceof Error ? error.message : "Something went wrong",
-      );
-    }
+    razorpay.open();
   };
 
   return (

@@ -1,6 +1,6 @@
 import z from "zod";
 import { TRPCError } from "@trpc/server";
-import { createTRPCRouter } from "@/trpc/init";
+import { createTRPCRouter, publicProcedure } from "@/trpc/init";
 import { UTApi } from "uploadthing/server";
 import {
   attachmentOwnerProcedure,
@@ -73,6 +73,83 @@ export const chapterRouter = createTRPCRouter({
         ),
       );
     }),
+
+  getDetails: publicProcedure
+    .input(
+      z.object({
+        courseId: z.string(),
+        chapterId: z.string(),
+      }),
+    )
+    .query(async ({ ctx, input }) => {
+      const chapter = await ctx.prisma.chapter.findFirst({
+        where: {
+          id: input.chapterId,
+          courseId: input.courseId,
+          isPublished: true,
+        },
+
+        include: {
+          course: {
+            select: {
+              id: true,
+              title: true,
+            },
+          },
+        },
+      });
+
+      if (!chapter) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+        });
+      }
+
+      const previousChapter = await ctx.prisma.chapter.findFirst({
+        where: {
+          courseId: input.courseId,
+          position: {
+            lt: chapter.position,
+          },
+          isPublished: true,
+        },
+
+        orderBy: {
+          position: "desc",
+        },
+
+        select: {
+          id: true,
+          title: true,
+        },
+      });
+
+      const nextChapter = await ctx.prisma.chapter.findFirst({
+        where: {
+          courseId: input.courseId,
+          position: {
+            gt: chapter.position,
+          },
+          isPublished: true,
+        },
+
+        orderBy: {
+          position: "asc",
+        },
+
+        select: {
+          id: true,
+          title: true,
+        },
+      });
+
+      return {
+        chapter,
+        previousChapter,
+        nextChapter,
+      };
+    }),
+
   getById: chapterDetailsProcedure.query(({ ctx }) => {
     return ctx.chapter;
   }),

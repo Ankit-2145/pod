@@ -5,6 +5,7 @@ import {
   createTRPCRouter,
   instructorProcedure,
   protectedProcedure,
+  publicProcedure,
 } from "@/trpc/init";
 import { UTApi } from "uploadthing/server";
 import { razorpay } from "@/lib/razorpay";
@@ -35,6 +36,109 @@ export const courseRouter = createTRPCRouter({
       });
 
       return course;
+    }),
+
+  getPublicCourseDetails: publicProcedure
+    .input(
+      z.object({
+        courseId: z.string(),
+      }),
+    )
+    .query(async ({ ctx, input }) => {
+      const user = ctx.session?.user;
+
+      const course = await ctx.prisma.course.findUnique({
+        where: {
+          id: input.courseId,
+          isPublished: true,
+        },
+
+        include: {
+          category: {
+            select: {
+              id: true,
+              name: true,
+              slug: true,
+            },
+          },
+
+          author: {
+            select: {
+              id: true,
+              name: true,
+              image: true,
+            },
+          },
+
+          chapters: {
+            where: {
+              isPublished: true,
+            },
+
+            orderBy: {
+              position: "asc",
+            },
+
+            select: {
+              id: true,
+              title: true,
+              position: true,
+              isFree: true,
+            },
+          },
+
+          purchases: user
+            ? {
+                where: {
+                  userId: user.id,
+                },
+
+                select: {
+                  id: true,
+                },
+              }
+            : false,
+        },
+      });
+
+      if (!course) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Course not found",
+        });
+      }
+
+      const isPurchased = user ? course.purchases.length > 0 : false;
+
+      const canManage =
+        !!user &&
+        (user.role === "admin" ||
+          user.role === "superAdmin" ||
+          course.authorId === user.id);
+
+      const hasAccess = isPurchased || canManage;
+
+      return {
+        id: course.id,
+        title: course.title,
+        description: course.description,
+        imageUrl: course.imageUrl,
+        price: course.price,
+
+        author: course.author,
+
+        category: course.category,
+
+        chapters: course.chapters,
+
+        totalChapters: course.chapters.length,
+
+        isPurchased,
+
+        canManage,
+
+        hasAccess,
+      };
     }),
 
   getById: courseDetailsProcedure.query(({ ctx }) => {
@@ -370,43 +474,71 @@ export const courseRouter = createTRPCRouter({
       });
     }),
 
-  getPublished: protectedProcedure.query(async ({ ctx }) => {
-    const user = ctx.user;
+  getPublished: publicProcedure.query(async ({ ctx }) => {
+    const user = ctx.session?.user;
 
     const courses = await ctx.prisma.course.findMany({
       where: {
         isPublished: true,
       },
+
       include: {
-        category: true,
+        category: {
+          select: {
+            id: true,
+            name: true,
+            slug: true,
+          },
+        },
+
         chapters: {
           where: {
             isPublished: true,
           },
-        },
-        purchases: {
-          where: {
-            userId: user.id,
-          },
+
           select: {
             id: true,
           },
         },
+
+        purchases: user
+          ? {
+              where: {
+                userId: user.id,
+              },
+
+              select: {
+                id: true,
+              },
+            }
+          : false,
+
+        author: {
+          select: {
+            id: true,
+            name: true,
+            image: true,
+          },
+        },
       },
+
       orderBy: {
         createdAt: "desc",
       },
     });
 
-    return courses.map(({ purchases, ...course }) => ({
+    return courses.map(({ purchases, chapters, ...course }) => ({
       ...course,
 
-      canManage:
-        user.role === "admin" ||
-        user.role === "superAdmin" ||
-        course.authorId === user.id,
+      totalChapters: chapters.length,
 
-      isPurchased: purchases.length > 0,
+      isPurchased: user ? purchases.length > 0 : false,
+
+      canManage:
+        !!user &&
+        (user.role === "admin" ||
+          user.role === "superAdmin" ||
+          course.authorId === user.id),
     }));
   }),
 
@@ -449,6 +581,26 @@ export const courseRouter = createTRPCRouter({
         });
       }
 
+      const firstChapter = await ctx.prisma.chapter.findFirst({
+        where: {
+          courseId: course.id,
+          isPublished: true,
+        },
+        orderBy: {
+          position: "asc",
+        },
+        select: {
+          id: true,
+        },
+      });
+
+      if (!firstChapter) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "No published chapters found",
+        });
+      }
+
       const order = await razorpay.orders.create({
         amount: Math.round(course.price! * 100),
         currency: "INR",
@@ -463,17 +615,20 @@ export const courseRouter = createTRPCRouter({
         orderId: order.id,
         amount: order.amount,
         currency: order.currency,
+
         course: {
           id: course.id,
           title: course.title,
         },
+
+        firstChapterId: firstChapter.id,
+
         user: {
           name: user.name ?? "Student",
           email: user.email!,
         },
       };
     }),
-
   verifyPayment: protectedProcedure
     .input(
       z.object({
