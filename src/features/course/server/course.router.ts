@@ -501,17 +501,15 @@ export const courseRouter = createTRPCRouter({
           },
         },
 
-        purchases: user
-          ? {
-              where: {
-                userId: user.id,
-              },
+        purchases: {
+          where: {
+            userId: user?.id ?? "",
+          },
 
-              select: {
-                id: true,
-              },
-            }
-          : false,
+          select: {
+            id: true,
+          },
+        },
 
         author: {
           select: {
@@ -532,7 +530,7 @@ export const courseRouter = createTRPCRouter({
 
       totalChapters: chapters.length,
 
-      isPurchased: user ? purchases.length > 0 : false,
+      isPurchased: purchases.length > 0,
 
       canManage:
         !!user &&
