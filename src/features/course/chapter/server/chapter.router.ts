@@ -82,6 +82,8 @@ export const chapterRouter = createTRPCRouter({
       }),
     )
     .query(async ({ ctx, input }) => {
+      const user = ctx.session?.user;
+
       const chapter = await ctx.prisma.chapter.findFirst({
         where: {
           id: input.chapterId,
@@ -94,6 +96,7 @@ export const chapterRouter = createTRPCRouter({
             select: {
               id: true,
               title: true,
+              authorId: true,
             },
           },
         },
@@ -102,8 +105,36 @@ export const chapterRouter = createTRPCRouter({
       if (!chapter) {
         throw new TRPCError({
           code: "NOT_FOUND",
+          message: "Chapter not found",
         });
       }
+
+      let isPurchased = false;
+
+      if (user) {
+        const purchase = await ctx.prisma.purchase.findUnique({
+          where: {
+            userId_courseId: {
+              userId: user.id,
+              courseId: input.courseId,
+            },
+          },
+
+          select: {
+            id: true,
+          },
+        });
+
+        isPurchased = !!purchase;
+      }
+
+      const canManage =
+        !!user &&
+        (user.role === "admin" ||
+          user.role === "superAdmin" ||
+          chapter.course.authorId === user.id);
+
+      const canAccess = chapter.isFree || isPurchased || canManage;
 
       const previousChapter = await ctx.prisma.chapter.findFirst({
         where: {
@@ -121,6 +152,7 @@ export const chapterRouter = createTRPCRouter({
         select: {
           id: true,
           title: true,
+          isFree: true,
         },
       });
 
@@ -140,13 +172,28 @@ export const chapterRouter = createTRPCRouter({
         select: {
           id: true,
           title: true,
+          isFree: true,
         },
       });
+
+      if (!canAccess) {
+        return {
+          chapter,
+          previousChapter,
+          nextChapter,
+          isPurchased,
+          canManage,
+          isLocked: true,
+        };
+      }
 
       return {
         chapter,
         previousChapter,
         nextChapter,
+        isPurchased,
+        canManage,
+        isLocked: false,
       };
     }),
 

@@ -138,24 +138,29 @@ export function CourseDetails({ courseId }: CourseDetailsProps) {
           {/* Chapters Grid */}
           <div className="grid gap-4 md:grid-cols-2">
             {course.chapters.map((chapter, index) => (
-              <div
+              <Link
                 key={chapter.id}
-                className="group rounded-xl border border-border bg-white p-6 transition-all duration-300 hover:border-accent hover:shadow-md dark:bg-card/50"
+                href={`/courses/${course.id}/chapters/${chapter.id}`}
               >
-                <div className="mb-3 flex items-start justify-between">
-                  <span className="font-fontUrbanist text-2xl font-bold text-accent/40 group-hover:text-accent/60">
-                    {String(index + 1).padStart(2, "0")}
-                  </span>
-                  {chapter.isFree && (
-                    <span className="rounded-full bg-accent/10 px-3 py-1 text-xs font-fontUrbanist font-semibold text-accent">
-                      Free Preview
+                <div
+                  key={chapter.id}
+                  className="group rounded-xl border border-border bg-white p-6 transition-all duration-300 hover:border-accent hover:shadow-md dark:bg-card/50"
+                >
+                  <div className="mb-3 flex items-start justify-between">
+                    <span className="font-fontUrbanist text-2xl font-bold text-accent/40 group-hover:text-accent/60">
+                      {String(index + 1).padStart(2, "0")}
                     </span>
-                  )}
+                    {chapter.isFree && (
+                      <span className="rounded-full bg-accent/10 px-3 py-1 text-xs font-fontUrbanist font-semibold text-accent">
+                        Free Preview
+                      </span>
+                    )}
+                  </div>
+                  <h3 className="font-fontUrbanist text-lg font-semibold text-foreground">
+                    {chapter.title}
+                  </h3>
                 </div>
-                <h3 className="font-fontUrbanist text-lg font-semibold text-foreground">
-                  {chapter.title}
-                </h3>
-              </div>
+              </Link>
             ))}
           </div>
         </section>
