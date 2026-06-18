@@ -1,7 +1,9 @@
 import { CoursesList } from "@/features/course/course-list";
+import { requireAuth } from "@/lib/auth/auth-check";
 import { HydrateClient, prefetch, trpc } from "@/trpc/server";
 
 export default async function CoursesPage() {
+  await requireAuth();
   prefetch(trpc.course.getPublished.queryOptions());
 
   return (
