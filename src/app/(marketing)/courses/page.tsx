@@ -1,16 +1,16 @@
 import { CoursesList } from "@/features/course/course-list";
-import { requireAuth } from "@/lib/auth/auth-check";
-import { Suspense } from "react";
+import { HydrateClient, prefetch, trpc } from "@/trpc/server";
 
 export default async function CoursesPage() {
-  await requireAuth();
-  return (
-    <section className="p-6">
-      <h1 className="mb-6 text-3xl font-bold">Our Courses</h1>
+  prefetch(trpc.course.getPublished.queryOptions());
 
-      <Suspense fallback={<div>Loading courses...</div>}>
+  return (
+    <HydrateClient>
+      <section className="p-6">
+        <h1 className="mb-6 text-3xl font-bold">Our Courses</h1>
+
         <CoursesList />
-      </Suspense>
-    </section>
+      </section>
+    </HydrateClient>
   );
 }
