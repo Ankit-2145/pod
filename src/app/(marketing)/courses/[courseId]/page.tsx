@@ -10,7 +10,7 @@ type PageProps = {
 const CourseIdPage = async ({ params }: PageProps) => {
   const { courseId } = await params;
 
-  await prefetch(
+  prefetch(
     trpc.course.getPublicCourseDetails.queryOptions({
       courseId,
     }),

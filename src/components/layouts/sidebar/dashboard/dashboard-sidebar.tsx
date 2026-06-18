@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { BookOpenIcon, Settings2Icon } from "lucide-react";
+import { BookOpenIcon } from "lucide-react";
 // import { NavMain } from "./nav-main";
 import { NavUser } from "./nav-user";
 import {
@@ -31,48 +31,7 @@ const data = {
           title: "Create Course",
           url: "/dashboard/courses/create",
         },
-        {
-          title: "Categories",
-          url: "/dashboard/courses/categories",
-        },
       ],
-    },
-    {
-      title: "Settings",
-      url: "#",
-      icon: Settings2Icon,
-      items: [
-        {
-          title: "General",
-          url: "#",
-        },
-        {
-          title: "Team",
-          url: "#",
-        },
-        {
-          title: "Billing",
-          url: "#",
-        },
-        {
-          title: "Limits",
-          url: "#",
-        },
-      ],
-    },
-  ],
-  projects: [
-    {
-      name: "Home",
-      url: "/dashboard",
-    },
-    {
-      name: "Sales & Marketing",
-      url: "#",
-    },
-    {
-      name: "Travel",
-      url: "#",
     },
   ],
 };
