@@ -74,10 +74,16 @@ export function CoursesList() {
             <div className="flex items-center justify-between text-sm">
               <span>{course.totalChapters} chapters</span>
 
-              {course.price && (
-                <span className="font-semibold">
-                  {formatPrice(course.price)}
+              {course.isPurchased ? (
+                <span className="rounded-md bg-green-100 px-2 py-1 text-xs font-semibold text-green-800">
+                  Continue learning
                 </span>
+              ) : (
+                course.price && (
+                  <span className="font-semibold">
+                    {formatPrice(course.price)}
+                  </span>
+                )
               )}
             </div>
 

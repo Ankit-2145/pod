@@ -102,7 +102,7 @@ export function ChaptersList({
                     ref={provided.innerRef}
                     {...provided.draggableProps}
                     className={cn(
-                      "flex items-center gap-x-2 rounded-md border border-blue-100 text-sm text-slate-700 transition",
+                      "flex items-center gap-x-2 rounded-md border border-blue-100 text-sm text-foreground transition",
                       isPending && "pointer-events-none opacity-70",
                     )}
                   >
@@ -128,8 +128,8 @@ export function ChaptersList({
 
                       <Badge
                         className={cn(
-                          "rounded-full border-brand bg-transparent text-brand",
-                          chapter.isPublished && "bg-brand text-white",
+                          "rounded-full border-brand bg-transparent",
+                          chapter.isPublished && "bg-green-500 text-white",
                         )}
                       >
                         {chapter.isPublished ? "Published" : "Draft"}

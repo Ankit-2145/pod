@@ -84,7 +84,7 @@ export const UserButton = () => {
           </div>
           {/* Uncomment if you want the badge */}
           <Badge variant="secondary" className="mt-2 w-fit text-xs">
-            {activeOrg?.name}
+            {activeOrg?.name} {session?.user?.role || "User"}
           </Badge>
         </div>
 

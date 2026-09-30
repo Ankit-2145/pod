@@ -61,6 +61,7 @@ export function ShortDescriptionForm({
 
   const form = useForm<ShortDescriptionFormValues>({
     resolver: zodResolver(shortDescriptionFormSchema),
+    mode: "onChange",
 
     defaultValues: {
       shortDescription: initialData.shortDescription || "",
