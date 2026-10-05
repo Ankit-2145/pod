@@ -3,6 +3,7 @@ import {
   twoFactorClient,
   adminClient,
   organizationClient,
+  lastLoginMethodClient,
 } from "better-auth/client/plugins";
 import {
   ac,
@@ -29,5 +30,7 @@ export const authClient = createAuthClient({
       },
     }),
     organizationClient(),
+
+    lastLoginMethodClient(),
   ],
 });

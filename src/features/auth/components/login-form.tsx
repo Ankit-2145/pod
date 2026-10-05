@@ -20,6 +20,7 @@ import {
 } from "@/components/ui/field";
 import { PasswordInput } from "@/components/ui/password-input";
 import { SocialAuthButtons } from "./social-auth-buttons";
+import { Badge } from "@/components/ui/badge";
 
 const loginSchema = z.object({
   email: z.email("Please enter a valid email address"),
@@ -38,6 +39,8 @@ export function LoginForm() {
       password: "",
     },
   });
+
+  const lastMethod = authClient.getLastUsedLoginMethod();
 
   const onLogin = async (values: LoginFormValues) => {
     await authClient.signIn.email(
@@ -125,6 +128,9 @@ export function LoginForm() {
           <Field>
             <Button type="submit" className="w-full" disabled={isPending}>
               Login
+              {lastMethod === "email" && (
+                <Badge className="ml-2 bg-white">Last used</Badge>
+              )}
             </Button>
           </Field>
           <FieldSeparator>Or</FieldSeparator>

@@ -1,6 +1,7 @@
 import { betterAuth } from "better-auth";
 import prisma from "@/lib/db/prisma";
 import { nextCookies } from "better-auth/next-js";
+import { lastLoginMethod } from "better-auth/plugins";
 import { prismaAdapter } from "better-auth/adapters/prisma";
 import {
   admin as adminPlugin,
@@ -78,6 +79,7 @@ export const auth = betterAuth({
     },
   },
   plugins: [
+    lastLoginMethod(),
     twoFactor(),
     adminPlugin({
       ac,
